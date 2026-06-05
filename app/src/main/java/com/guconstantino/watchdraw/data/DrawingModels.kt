@@ -9,18 +9,19 @@ data class DrawnPath(
     val strokeWidth: Float
 )
 
+// Exact palette from the Figma "Color Selector" (node 145007:380), in grid order
+// (row by row, left→right). These are the ONLY colors the app draws with.
 val DrawingColors = listOf(
-    Color.White,
-    Color(0xFFFF5252),  // Red
-    Color(0xFFFF9800),  // Orange
-    Color(0xFFFFEB3B),  // Yellow
-    Color(0xFF69F0AE),  // Green neon
-    Color(0xFF40C4FF),  // Cyan
-    Color(0xFF7C4DFF),  // Purple
-    Color(0xFFFF4081),  // Pink
+    Color(0xFFF21B3F), // red
+    Color(0xFFFF9914), // orange
+    Color(0xFF08BDBD), // teal
+    Color(0xFF29BF12), // green
+    Color(0xFFFF14B1), // magenta
+    Color(0xFFFFFFFF), // white
 )
 
-val StrokeWidths = listOf(2f, 5f, 10f, 18f)
+// Three brush sizes (thin, medium, thick). Default selection is the medium one.
+val StrokeWidths = listOf(3f, 9f, 18f)
 
 enum class AppScreen {
     Canvas, StrokePicker, ColorPicker, Actions, ClearConfirm
