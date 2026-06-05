@@ -2,8 +2,11 @@ package com.guconstantino.watchdraw.presentation
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,13 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material3.CompactButton
-import androidx.wear.compose.material3.CompactButtonDefaults
-import androidx.wear.compose.material3.Icon
-import androidx.wear.compose.material3.MaterialTheme
 import com.guconstantino.watchdraw.data.AppScreen
 import com.guconstantino.watchdraw.data.DrawingViewModel
 
@@ -51,11 +51,9 @@ fun DrawingCanvasScreen(viewModel: DrawingViewModel) {
                     )
                 }
         ) {
-            // Draw completed paths
             viewModel.drawnPaths.forEach { drawnPath ->
                 drawSmoothPath(drawnPath.points, drawnPath.color, drawnPath.strokeWidth)
             }
-            // Draw live current path
             if (viewModel.currentPoints.size > 1) {
                 drawSmoothPath(viewModel.currentPoints, viewModel.currentColor, viewModel.currentStrokeWidth)
             }
@@ -66,29 +64,24 @@ fun DrawingCanvasScreen(viewModel: DrawingViewModel) {
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // Stroke width button
-            CompactButton(
-                onClick = { viewModel.currentScreen = AppScreen.StrokePicker },
-                modifier = Modifier.size(32.dp),
-                colors = CompactButtonDefaults.compactButtonColors(
-                    containerColor = Color.DarkGray.copy(alpha = 0.7f)
-                )
-            ) {
-                StrokeIcon(strokeWidth = viewModel.currentStrokeWidth)
+            ToolbarButton(onClick = { viewModel.currentScreen = AppScreen.StrokePicker }) {
+                Canvas(modifier = Modifier.size(16.dp)) {
+                    drawLine(
+                        color = Color.White,
+                        start = Offset(0f, size.height / 2),
+                        end = Offset(size.width, size.height / 2),
+                        strokeWidth = viewModel.currentStrokeWidth.coerceIn(1f, 6f),
+                        cap = StrokeCap.Round
+                    )
+                }
             }
 
             // Color picker button
-            CompactButton(
-                onClick = { viewModel.currentScreen = AppScreen.ColorPicker },
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .size(36.dp),
-                colors = CompactButtonDefaults.compactButtonColors(
-                    containerColor = Color.DarkGray.copy(alpha = 0.7f)
-                )
-            ) {
+            ToolbarButton(onClick = { viewModel.currentScreen = AppScreen.ColorPicker }) {
                 Box(
                     modifier = Modifier
                         .size(16.dp)
@@ -97,17 +90,11 @@ fun DrawingCanvasScreen(viewModel: DrawingViewModel) {
                 )
             }
 
-            // Actions button
-            CompactButton(
-                onClick = { viewModel.currentScreen = AppScreen.Actions },
-                modifier = Modifier.size(32.dp),
-                colors = CompactButtonDefaults.compactButtonColors(
-                    containerColor = Color.DarkGray.copy(alpha = 0.7f)
-                )
-            ) {
-                androidx.compose.foundation.layout.Column(
+            // Actions button (hamburger)
+            ToolbarButton(onClick = { viewModel.currentScreen = AppScreen.Actions }) {
+                Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     repeat(3) {
                         Box(
@@ -122,7 +109,21 @@ fun DrawingCanvasScreen(viewModel: DrawingViewModel) {
     }
 }
 
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSmoothPath(
+@Composable
+private fun ToolbarButton(onClick: () -> Unit, content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(Color.DarkGray.copy(alpha = 0.7f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        content()
+    }
+}
+
+private fun DrawScope.drawSmoothPath(
     points: List<Offset>,
     color: Color,
     strokeWidth: Float
@@ -154,18 +155,4 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSmoothPath(
             join = StrokeJoin.Round
         )
     )
-}
-
-@Composable
-private fun StrokeIcon(strokeWidth: Float) {
-    Canvas(modifier = Modifier.size(16.dp)) {
-        val w = strokeWidth.coerceIn(1f, 6f)
-        drawLine(
-            color = Color.White,
-            start = Offset(0f, size.height / 2),
-            end = Offset(size.width, size.height / 2),
-            strokeWidth = w,
-            cap = StrokeCap.Round
-        )
-    }
 }
