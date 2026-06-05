@@ -1,0 +1,115 @@
+package com.guconstantino.watchdraw.presentation
+
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.Path
+import android.os.Build
+import android.provider.MediaStore
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.IntSize
+import androidx.core.content.FileProvider
+import com.guconstantino.watchdraw.data.DrawingViewModel
+import java.io.File
+import java.io.FileOutputStream
+
+/**
+ * Rasterizes the current drawing (black background + all committed strokes) into a
+ * Bitmap matching the on-screen canvas size. Mirrors [drawSmoothPath] using the
+ * Android graphics API so the exported image looks identical to the canvas.
+ */
+fun renderDrawingBitmap(viewModel: DrawingViewModel, size: IntSize): Bitmap {
+    val w = size.width.coerceAtLeast(1)
+    val h = size.height.coerceAtLeast(1)
+    val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    canvas.drawColor(android.graphics.Color.BLACK)
+
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+    }
+
+    viewModel.drawnPaths.forEach { drawn ->
+        drawAndroidPath(canvas, paint, drawn.points, drawn.color.toArgb(), drawn.strokeWidth)
+    }
+    return bitmap
+}
+
+private fun drawAndroidPath(
+    canvas: android.graphics.Canvas,
+    paint: Paint,
+    points: List<Offset>,
+    color: Int,
+    strokeWidth: Float
+) {
+    if (points.isEmpty()) return
+    paint.color = color
+    paint.strokeWidth = strokeWidth
+
+    if (points.size == 1) {
+        val saved = paint.style
+        paint.style = Paint.Style.FILL
+        canvas.drawCircle(points[0].x, points[0].y, strokeWidth / 2f, paint)
+        paint.style = saved
+        return
+    }
+
+    val path = Path().apply {
+        moveTo(points[0].x, points[0].y)
+        for (i in 0 until points.size - 1) {
+            val midX = (points[i].x + points[i + 1].x) / 2f
+            val midY = (points[i].y + points[i + 1].y) / 2f
+            quadTo(points[i].x, points[i].y, midX, midY)
+        }
+        lineTo(points.last().x, points.last().y)
+    }
+    canvas.drawPath(path, paint)
+}
+
+/** Writes [bitmap] to the share cache and launches the system share sheet. */
+fun shareDrawing(context: Context, bitmap: Bitmap) {
+    val dir = File(context.cacheDir, "shared").apply { mkdirs() }
+    val file = File(dir, "watchdraw.png")
+    FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
+    val send = Intent(Intent.ACTION_SEND).apply {
+        type = "image/png"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    val chooser = Intent.createChooser(send, "Share drawing")
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(chooser)
+}
+
+/** Saves [bitmap] to the device gallery (Pictures/WatchDraw) via MediaStore. */
+fun saveDrawingToGallery(context: Context, bitmap: Bitmap): Boolean {
+    val name = "watchdraw_${System.currentTimeMillis()}.png"
+    val values = ContentValues().apply {
+        put(MediaStore.Images.Media.DISPLAY_NAME, name)
+        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/WatchDraw")
+        }
+    }
+    val resolver = context.contentResolver
+    val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        ?: return false
+    return try {
+        resolver.openOutputStream(uri)?.use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        } != null
+    } catch (e: Exception) {
+        false
+    }
+}
