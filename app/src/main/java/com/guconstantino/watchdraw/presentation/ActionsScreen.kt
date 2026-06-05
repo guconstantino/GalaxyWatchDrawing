@@ -1,6 +1,7 @@
 package com.guconstantino.watchdraw.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,19 +9,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Undo
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material3.CompactButton
-import androidx.wear.compose.material3.CompactButtonDefaults
-import androidx.wear.compose.material3.Icon
-import androidx.wear.compose.material3.MaterialTheme
+import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material3.Text
 import com.guconstantino.watchdraw.data.AppScreen
 import com.guconstantino.watchdraw.data.DrawingViewModel
@@ -40,61 +38,23 @@ fun ActionsScreen(viewModel: DrawingViewModel) {
         ) {
             Text(
                 text = "Actions",
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.White
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Undo
-                CompactButton(
-                    onClick = {
-                        viewModel.undo()
-                        viewModel.currentScreen = AppScreen.Canvas
-                    },
-                    modifier = Modifier.size(44.dp),
-                    colors = CompactButtonDefaults.compactButtonColors(
-                        containerColor = Color.DarkGray
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Undo,
-                        contentDescription = "Undo",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+                CircleAction(label = "↶", background = Color.DarkGray) {
+                    viewModel.undo()
+                    viewModel.currentScreen = AppScreen.Canvas
                 }
-
-                // Clear canvas
-                CompactButton(
-                    onClick = { viewModel.currentScreen = AppScreen.ClearConfirm },
-                    modifier = Modifier.size(44.dp),
-                    colors = CompactButtonDefaults.compactButtonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Clear",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+                CircleAction(label = "🗑", background = Color(0xFFB00020)) {
+                    viewModel.currentScreen = AppScreen.ClearConfirm
                 }
             }
 
-            // Close
-            CompactButton(
-                onClick = { viewModel.currentScreen = AppScreen.Canvas },
-                modifier = Modifier.size(36.dp),
-                colors = CompactButtonDefaults.compactButtonColors(
-                    containerColor = Color.DarkGray
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = Color.White,
-                    modifier = Modifier.size(16.dp)
-                )
+            CircleAction(label = "✕", background = Color.DarkGray, size = 36) {
+                viewModel.currentScreen = AppScreen.Canvas
             }
         }
     }
@@ -114,47 +74,41 @@ fun ClearConfirmScreen(viewModel: DrawingViewModel) {
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Clear Canvas?",
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.White
+                text = "Clear canvas?",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Cancel
-                CompactButton(
-                    onClick = { viewModel.currentScreen = AppScreen.Canvas },
-                    modifier = Modifier.size(44.dp),
-                    colors = CompactButtonDefaults.compactButtonColors(
-                        containerColor = Color.DarkGray
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Cancel",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+                CircleAction(label = "✕", background = Color.DarkGray) {
+                    viewModel.currentScreen = AppScreen.Canvas
                 }
-
-                // Confirm clear
-                CompactButton(
-                    onClick = {
-                        viewModel.clearCanvas()
-                        viewModel.currentScreen = AppScreen.Canvas
-                    },
-                    modifier = Modifier.size(44.dp),
-                    colors = CompactButtonDefaults.compactButtonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Confirm Clear",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+                CircleAction(label = "🗑", background = Color(0xFFB00020)) {
+                    viewModel.clearCanvas()
+                    viewModel.currentScreen = AppScreen.Canvas
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CircleAction(
+    label: String,
+    background: Color,
+    size: Int = 48,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(size.dp)
+            .clip(CircleShape)
+            .background(background)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = label, color = Color.White, fontSize = 18.sp)
     }
 }
