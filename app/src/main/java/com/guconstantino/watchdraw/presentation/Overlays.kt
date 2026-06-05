@@ -141,12 +141,12 @@ fun StrokeMenu(viewModel: DrawingViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 options.forEach { (brushWidth, lineHeight) ->
+                    // Flat tappable row (no fill) — gray theme shows only the line.
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(32.dp)
                             .clip(RoundedCornerShape(26.dp))
-                            .background(PrimaryContainer)
                             .clickable { viewModel.setStrokeWidth(brushWidth) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -243,9 +243,9 @@ fun ActionsMenu(viewModel: DrawingViewModel) {
                         viewModel.toggleFavorite()
                     }) { IconHeart(Modifier.size(24.dp), filled = viewModel.favorite) }
 
-                    // Close
+                    // Close -> back to Home (tapping outside the menu returns to the drawing)
                     SurfaceIconButton(onClick = {
-                        viewModel.currentScreen = AppScreen.Canvas
+                        viewModel.currentScreen = AppScreen.Home
                     }) { IconClose(Modifier.size(24.dp)) }
                 }
             }
@@ -268,7 +268,7 @@ fun ClearConfirmMenu(viewModel: DrawingViewModel) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF4A4458))
+                        .background(PrimaryContainer)
                         .clickable {
                             viewModel.clearCanvas()
                             viewModel.currentScreen = AppScreen.Canvas

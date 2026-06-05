@@ -43,14 +43,17 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun WatchDrawApp(viewModel: DrawingViewModel) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        DrawingCanvasScreen(viewModel)
-        when (viewModel.currentScreen) {
-            AppScreen.Canvas -> {}
-            AppScreen.StrokePicker -> StrokeMenu(viewModel)
-            AppScreen.ColorPicker -> ColorMenu(viewModel)
-            AppScreen.Actions -> ActionsMenu(viewModel)
-            AppScreen.ClearConfirm -> ClearConfirmMenu(viewModel)
+    when (viewModel.currentScreen) {
+        AppScreen.Home -> HomeScreen(viewModel)
+        else -> Box(modifier = Modifier.fillMaxSize()) {
+            DrawingCanvasScreen(viewModel)
+            when (viewModel.currentScreen) {
+                AppScreen.StrokePicker -> StrokeMenu(viewModel)
+                AppScreen.ColorPicker -> ColorMenu(viewModel)
+                AppScreen.Actions -> ActionsMenu(viewModel)
+                AppScreen.ClearConfirm -> ClearConfirmMenu(viewModel)
+                else -> {} // Canvas: no overlay
+            }
         }
     }
 }

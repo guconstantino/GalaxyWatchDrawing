@@ -8,6 +8,13 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Added
+- **Tela Home** (Figma node 144969:299): menu vertical rolável com 5 botões
+  (New draw, My draws, Favorites, Trash, Settings), ícones a partir dos SVGs
+  exatos do Figma. O app agora **inicia na Home**. Por enquanto só **New draw**
+  está funcional — abre um desenho novo (limpa o canvas → `viewModel.newDrawing()`);
+  os demais são placeholders para implementar feature a feature.
+- Navegação Home↔Draw: no menu de ações, o **X volta para a Home** e **tocar
+  fora (scrim) volta para o desenho**.
 - Skill `instalacao` (`.claude/skills/instalacao`) com guia de setup do repo,
   bibliotecas necessárias e manutenção de changelog/releases.
 - Este `CHANGELOG.md`.
@@ -45,10 +52,15 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   `PathParser`. Itens: Limpar (abre confirmação), Download (salva o PNG na
   galeria), Coração (apenas alterna preenchido/outline, sem ação ainda) e
   Fechar. Compartilhar removido do menu.
-- Seletor de espessura refeito conforme o node Figma 145007:387: **3 opções**
-  (grosso/médio/fino) como botões-pill (`primary-container` #4D3D76, altura 32,
-  cantos 26) com linha de preview (`primary` #E9DDFF, 24×8/4/2dp) dentro de um
-  card `surface-container`. `StrokeWidths` reduzido para 3 valores.
+- Seletor de espessura conforme o node Figma 145007:387 (tema cinza): **3
+  opções** (grosso/médio/fino) em linhas tocáveis de 32dp **sem fill** (planas,
+  fiéis ao tema cinza), só com a linha de preview (24×8/4/2dp, #E2E2E2) dentro de
+  um card `surface-container`. `StrokeWidths` reduzido para 3 valores.
+- UI migrada para o **tema cinza (neutro)** do design kit, substituindo o roxo
+  do tema padrão: `surface-container` #332E3C → **#303131**, `primary-container`
+  #4D3D76 → **#454747**, linha do seletor de espessura #E9DDFF → **#E2E2E2**, e a
+  pill "Clear Canvas" deixou de ter tom roxo. Afeta menus, botões de ação e o
+  seletor de espessura.
 - Paleta de desenho fixada nas **6 cores exatas** do Color Selector do Figma
   (node 145007:380): vermelho #F21B3F, laranja #FF9914, teal #08BDBD, verde
   #29BF12, magenta #FF14B1, branco #FFFFFF. Não é possível desenhar com nenhuma
