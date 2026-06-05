@@ -24,5 +24,5 @@ val DrawingColors = listOf(
 val StrokeWidths = listOf(3f, 9f, 18f)
 
 enum class AppScreen {
-    Canvas, StrokePicker, ColorPicker, Actions, ClearConfirm
+    Home, Canvas, StrokePicker, ColorPicker, Actions, ClearConfirm
 }

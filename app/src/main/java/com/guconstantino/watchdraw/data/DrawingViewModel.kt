@@ -22,7 +22,7 @@ class DrawingViewModel : ViewModel() {
     var currentStrokeWidth by mutableStateOf(StrokeWidths[1])
         private set
 
-    var currentScreen by mutableStateOf(AppScreen.Canvas)
+    var currentScreen by mutableStateOf(AppScreen.Home)
 
     // Size of the on-screen drawing canvas in pixels; used to rasterize exports.
     var canvasSize by mutableStateOf(IntSize.Zero)
@@ -83,6 +83,12 @@ class DrawingViewModel : ViewModel() {
         _drawnPaths.clear()
         _undonePaths.clear()
         currentPoints = emptyList()
+    }
+
+    /** Starts a fresh drawing from the Home screen (clears the canvas). */
+    fun newDrawing() {
+        clearCanvas()
+        currentScreen = AppScreen.Canvas
     }
 
     fun setColor(color: Color) {
