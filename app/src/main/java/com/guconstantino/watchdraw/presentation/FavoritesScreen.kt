@@ -142,7 +142,7 @@ fun FavoritesScreen(viewModel: DrawingViewModel) {
                 val inset = 5.dp.toPx() + strokeW / 2f
                 val arcSize = Size(size.width - 2 * inset, size.height - 2 * inset)
                 val topLeft = Offset(inset, inset)
-                val gapBottom = 64f
+                val gapBottom = 160f
                 val totalSweep = 360f - gapBottom
                 val startAngle = 90f + gapBottom / 2f
                 val segGap = if (count > 1) 4f else 0f
@@ -160,22 +160,22 @@ fun FavoritesScreen(viewModel: DrawingViewModel) {
                 }
             }
 
-            // Controls: Trash | Unfavorite | Download | Edit
+            // Controls — same Figma positions as MyDrawsScreen (node 144969:301).
             FavArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = (-66).dp, y = (-16).dp),
+                    .offset(x = (-60).dp, y = (-48).dp),
                 onClick = {
                     viewModel.deleteCurrentFavoriteToTrash()
                     hapticWarning(context)
                     showDeletedMsg = true
                 }
-            ) { IconTrash(Modifier.size(22.dp)) }
+            ) { IconTrash(Modifier.size(24.dp)) }
 
             FavArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = (-28).dp, y = (-38).dp),
+                    .offset(x = (-24).dp, y = 0.dp),
                 onClick = {
                     val bmp = renderPathsBitmap(drawing.paths, viewModel.canvasSize)
                     val ok = saveDrawingToGallery(context, bmp)
@@ -185,25 +185,25 @@ fun FavoritesScreen(viewModel: DrawingViewModel) {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            ) { IconDownload(Modifier.size(22.dp)) }
+            ) { IconDownload(Modifier.size(24.dp)) }
 
             FavArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = 28.dp, y = (-38).dp),
+                    .offset(x = 24.dp, y = 0.dp),
                 onClick = {
                     viewModel.unfavoriteCurrentFavorite()
                     hapticSuccess(context)
                     showUnfavMsg = true
                 }
-            ) { IconHeart(Modifier.size(22.dp), filled = true) }
+            ) { IconHeart(Modifier.size(24.dp), filled = true) }
 
             FavArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = 66.dp, y = (-16).dp),
+                    .offset(x = 60.dp, y = (-48).dp),
                 onClick = { viewModel.editCurrentFavorite() }
-            ) { IconEdit(Modifier.size(22.dp)) }
+            ) { IconEdit(Modifier.size(24.dp)) }
         }
 
         // "Unfavorited" overlay
@@ -286,7 +286,7 @@ private fun FavArcIconButton(
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(PrimaryContainer),
+                .background(SurfaceContainer),
             contentAlignment = Alignment.Center
         ) {
             content()
