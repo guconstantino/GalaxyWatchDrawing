@@ -62,6 +62,46 @@ fun IconDownload(modifier: Modifier = Modifier, color: Color = IconOnContainer) 
 fun IconClose(modifier: Modifier = Modifier, color: Color = IconOnContainer) =
     VectorIcon(CloseSpec, modifier, color)
 
+// viewBox 14.4 x 16.8
+private val TrashPermanentSpec = IconSpec(
+    "M3 16.8C2.5 16.8 2.075 16.625 1.725 16.275C1.375 15.925 1.2 15.5 1.2 15V3H0.9C0.65 3 0.433333 2.91667 0.25 2.75C0.0833333 2.56667 0 2.35 0 2.1C0 1.85 0.0833333 1.64167 0.25 1.475C0.433333 1.29167 0.65 1.2 0.9 1.2H4.8V0.899999C4.8 0.649999 4.88333 0.441666 5.05 0.275C5.23333 0.0916667 5.45 0 5.7 0H8.7C8.95 0 9.15833 0.0916667 9.325 0.275C9.50833 0.441666 9.6 0.649999 9.6 0.899999V1.2H13.5C13.75 1.2 13.9583 1.29167 14.125 1.475C14.3083 1.64167 14.4 1.85 14.4 2.1C14.4 2.35 14.3083 2.56667 14.125 2.75C13.9583 2.91667 13.75 3 13.5 3H13.2V15C13.2 15.5 13.025 15.925 12.675 16.275C12.325 16.625 11.9 16.8 11.4 16.8H3ZM11.4 3H3V15H11.4V3Z",
+    14.4f, 16.8f
+)
+
+@Composable
+fun IconDeletePermanent(modifier: Modifier = Modifier, color: Color = Color(0xFF420B0B)) =
+    VectorIcon(TrashPermanentSpec, modifier, color)
+
+// viewBox 24 x 24
+private val RestoreSpec = IconSpec(
+    "M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z",
+    24f, 24f
+)
+
+@Composable
+fun IconRestore(modifier: Modifier = Modifier, color: Color = IconOnContainer) =
+    VectorIcon(RestoreSpec, modifier, color)
+
+// viewBox 24 x 24
+private val XSpec = IconSpec(
+    "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z",
+    24f, 24f
+)
+
+@Composable
+fun IconX(modifier: Modifier = Modifier, color: Color = IconOnContainer) =
+    VectorIcon(XSpec, modifier, color)
+
+// Material "edit" (pencil), viewBox 24 (cubic corner instead of arc).
+private val EditSpec = IconSpec(
+    "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
+    24f, 24f
+)
+
+@Composable
+fun IconEdit(modifier: Modifier = Modifier, color: Color = IconOnContainer) =
+    VectorIcon(EditSpec, modifier, color)
+
 @Composable
 fun IconHeart(modifier: Modifier = Modifier, filled: Boolean = false, color: Color = IconOnContainer) =
     VectorIcon(if (filled) HeartFilledSpec else HeartOutlineSpec, modifier, color)

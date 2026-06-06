@@ -1,5 +1,6 @@
 package com.guconstantino.watchdraw.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +33,7 @@ import com.guconstantino.watchdraw.data.DrawingViewModel
  */
 @Composable
 fun HomeScreen(viewModel: DrawingViewModel) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -52,21 +55,36 @@ fun HomeScreen(viewModel: DrawingViewModel) {
             background = PrimaryContainer,
             content = IconOnContainer,
             icon = { IconHomeMyDraws(Modifier.size(26.dp), IconOnContainer) },
-            onClick = { /* TODO: feature */ }
+            onClick = {
+                if (viewModel.myDraws.isEmpty()) {
+                    Toast.makeText(context, "My draws is empty", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.openMyDraws()
+                }
+            }
         )
         HomeButton(
             label = "Favorites",
             background = PrimaryContainer,
             content = IconOnContainer,
             icon = { IconHomeFavorite(Modifier.size(26.dp), IconOnContainer) },
-            onClick = { /* TODO: feature */ }
+            onClick = {
+                // Since favorites feature is a TODO, we can check a filtered list or just show empty for now
+                Toast.makeText(context, "Favorites is empty", Toast.LENGTH_SHORT).show()
+            }
         )
         HomeButton(
             label = "Trash",
             background = PrimaryContainer,
             content = IconOnContainer,
             icon = { IconHomeTrash(Modifier.size(26.dp), IconOnContainer) },
-            onClick = { /* TODO: feature */ }
+            onClick = {
+                if (viewModel.trash.isEmpty()) {
+                    Toast.makeText(context, "Trash is empty", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.openTrash()
+                }
+            }
         )
         HomeButton(
             label = "Settings",

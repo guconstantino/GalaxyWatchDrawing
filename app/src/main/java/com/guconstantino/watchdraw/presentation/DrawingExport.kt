@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.IntSize
 import androidx.core.content.FileProvider
 import com.guconstantino.watchdraw.data.DrawingViewModel
+import com.guconstantino.watchdraw.data.DrawnPath
 import java.io.File
 import java.io.FileOutputStream
 
@@ -21,7 +22,11 @@ import java.io.FileOutputStream
  * Bitmap matching the on-screen canvas size. Mirrors [drawSmoothPath] using the
  * Android graphics API so the exported image looks identical to the canvas.
  */
-fun renderDrawingBitmap(viewModel: DrawingViewModel, size: IntSize): Bitmap {
+fun renderDrawingBitmap(viewModel: DrawingViewModel, size: IntSize): Bitmap =
+    renderPathsBitmap(viewModel.drawnPaths, size)
+
+/** Rasterizes an arbitrary list of strokes (black background) into a Bitmap. */
+fun renderPathsBitmap(paths: List<DrawnPath>, size: IntSize): Bitmap {
     val w = size.width.coerceAtLeast(1)
     val h = size.height.coerceAtLeast(1)
     val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
@@ -34,7 +39,7 @@ fun renderDrawingBitmap(viewModel: DrawingViewModel, size: IntSize): Bitmap {
         strokeJoin = Paint.Join.ROUND
     }
 
-    viewModel.drawnPaths.forEach { drawn ->
+    paths.forEach { drawn ->
         drawAndroidPath(canvas, paint, drawn.points, drawn.color.toArgb(), drawn.strokeWidth)
     }
     return bitmap

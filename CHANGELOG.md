@@ -8,11 +8,32 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Added
+- **My draws** (galeria de desenhos): os desenhos do usuário são salvos
+  automaticamente ao sair do Draw pelo **X** (novo, ou atualiza se veio de Edit)
+  e persistidos em disco (JSON em `filesDir`, via `DrawingStore`). A galeria
+  mostra um desenho por vez com uma **coroa segmentada** no bezel (1 segmento por
+  desenho, atual destacado). Navegação: **girar o dedo** (horário = próximo,
+  anti-horário = anterior) **ou arrastar na vertical** (cima = próximo, baixo =
+  anterior). Controles: **Delete** (move para a lixeira), **Download** (salva PNG
+  na galeria) e **Edit** (reabre para editar). **Voltar** (gesto de back ou botão
+  físico) retorna à Home. Limite de **100 desenhos** (descarta o mais antigo). O
+  `DrawingViewModel` virou `AndroidViewModel` para persistência.
+- **Tela Trash** (lixeira): galeria de desenhos deletados com navegação idêntica
+  à My draws (girar/arrastar com tick háptico). Controles: **Delete permanente**
+  (abre `DeleteConfirmMenu`), **Restore** (devolve para My draws) e **Edit**
+  (reabre para editar como novo desenho). Desenhos expiram automaticamente após
+  **30 dias** na lixeira (limpeza automática no `init` do ViewModel).
+- `DeleteConfirmMenu`: modal de confirmação para exclusão permanente de um item
+  da lixeira (card vermelho + botão X para cancelar).
+- Novos ícones em `MenuIcons.kt`: `IconDeletePermanent` (lixeira), `IconRestore`
+  (seta circular de restaurar), `IconX` (X de fechar) e `IconEdit` (lápis).
+- Novas funções hápticas em `Haptics.kt`: `hapticScrollTick` (tick curto/leve
+  para navegação na galeria), `hapticSuccess` (pulso duplo para restore/clear) e
+  `hapticWarning` (pulso longo para ações de delete).
 - **Tela Home** (Figma node 144969:299): menu vertical rolável com 5 botões
   (New draw, My draws, Favorites, Trash, Settings), ícones a partir dos SVGs
-  exatos do Figma. O app agora **inicia na Home**. Por enquanto só **New draw**
-  está funcional — abre um desenho novo (limpa o canvas → `viewModel.newDrawing()`);
-  os demais são placeholders para implementar feature a feature.
+  exatos do Figma. O app agora **inicia na Home**. **New draw**, **My draws** e
+  **Trash** são funcionais; Favorites e Settings exibem Toast de placeholder.
 - Navegação Home↔Draw: no menu de ações, o **X volta para a Home** e **tocar
   fora (scrim) volta para o desenho**.
 - Skill `instalacao` (`.claude/skills/instalacao`) com guia de setup do repo,
@@ -61,11 +82,20 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   #4D3D76 → **#454747**, linha do seletor de espessura #E9DDFF → **#E2E2E2**, e a
   pill "Clear Canvas" deixou de ter tom roxo. Afeta menus, botões de ação e o
   seletor de espessura.
-- Paleta de desenho fixada nas **6 cores exatas** do Color Selector do Figma
-  (node 145007:380): vermelho #F21B3F, laranja #FF9914, teal #08BDBD, verde
-  #29BF12, magenta #FF14B1, branco #FFFFFF. Não é possível desenhar com nenhuma
-  cor fora dessa paleta. `ColorMenu` alinhado ao box model do node (card
-  `surface-container`, grade 2×3, círculos 24dp, gap 6, padding 12, radius 26).
+- Paleta de cores atualizada com as **6 cores corretas** do Color Selector do
+  Figma (node 145007:380, grid 2×3, da esquerda para direita por linha):
+  Vermelho `#DA0505`, Azul `#128AE6`, Laranja-avermelhado `#ED3F1C`,
+  Verde `#14AA60`, Laranja `#FF9914`, Branco/Cinza `#E6E6E6`.
+  (Substitui a versão anterior com teal, magenta e branco puro.)
+- `renderDrawingBitmap` refatorado como `renderPathsBitmap(paths, size)` para
+  ser reutilizável nas galerias My draws e Trash sem depender do ViewModel.
+- `drawSmoothPath` alterado de `private` para `internal` para ser acessível
+  em `MyDrawsScreen` e `TrashScreen`.
+- Botões **My draws** e **Trash** na Home agora funcionais (antes eram `TODO`);
+  exibem Toast informativo quando a lista está vazia.
+- Fechar o menu de ações pelo **X** agora salva o desenho automaticamente antes
+  de retornar à Home (via `exitToHome()`).
+- Vibração háptica `hapticWarning` adicionada ao confirmar limpeza do canvas.
 
 ## [0.1.0] - 2026-06-05
 
