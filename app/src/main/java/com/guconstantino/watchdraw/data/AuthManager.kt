@@ -2,8 +2,10 @@ package com.guconstantino.watchdraw.data
 
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
 import com.guconstantino.watchdraw.R
 
 /** The signed-in user, as shown on the Profile screen. */
@@ -24,13 +26,34 @@ data class UserProfile(
  */
 object AuthManager {
 
+    /**
+     * OAuth scope that lets the app upload images to (and create albums in) the
+     * user's Google Photos library. Append-only: we can add new media we create,
+     * but cannot read or browse the user's existing library. This scope survived
+     * the March 2025 Photos API changes (only the read/sharing scopes were removed).
+     */
+    const val PHOTOS_APPEND_SCOPE = "https://www.googleapis.com/auth/photoslibrary.appendonly"
+
+    private val photosScope = Scope(PHOTOS_APPEND_SCOPE)
+
     fun client(context: Context): GoogleSignInClient {
         val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.default_web_client_id))
             .requestEmail()
             .requestProfile()
+            .requestScopes(photosScope)
             .build()
         return GoogleSignIn.getClient(context, options)
+    }
+
+    /** The raw signed-in account (needed to obtain an OAuth access token). */
+    fun account(context: Context): GoogleSignInAccount? =
+        GoogleSignIn.getLastSignedInAccount(context)
+
+    /** True when the signed-in user has granted the Google Photos append scope. */
+    fun hasPhotosScope(context: Context): Boolean {
+        val account = account(context) ?: return false
+        return GoogleSignIn.hasPermissions(account, photosScope)
     }
 
     /** The currently signed-in user, or null if nobody is signed in. */
