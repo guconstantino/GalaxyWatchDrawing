@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- App "scribble" wave, colored with the drawing palette
+         (red -> orange -> green -> blue) as a linear gradient stroke. -->
     <path
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="4"
+        android:strokeWidth="11"
         android:strokeLineCap="round"
-        android:pathData="M30,70 Q45,30 54,54 Q63,78 78,40"
-        android:fillColor="@android:color/transparent"/>
+        android:strokeLineJoin="round"
+        android:pathData="M28,70 Q44,28 54,54 Q64,80 80,40"
+        android:fillColor="@android:color/transparent">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="28" android:startY="54"
+                android:endX="80" android:endY="54">
+                <item android:offset="0.0" android:color="#DA0505" />
+                <item android:offset="0.34" android:color="#FF9914" />
+                <item android:offset="0.67" android:color="#14AA60" />
+                <item android:offset="1.0" android:color="#128AE6" />
+            </gradient>
+        </aapt:attr>
+    </path>
 </vector>

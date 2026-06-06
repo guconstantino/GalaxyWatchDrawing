@@ -83,6 +83,10 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   (`Haptics.kt`); requer permissão `VIBRATE`.
 
 ### Changed
+- **Ícone do app** atualizado: a "onda" agora usa o gradiente colorido da paleta
+  (vermelho→laranja→verde→azul) sobre fundo preto, no lugar do traço branco.
+  Vetorial (gradiente no `strokeColor`), aplicado via adaptive icon — vale para
+  Galaxy Watch e Wear OS round. Combina com o ícone e o feature graphic da loja.
 - Gradle wrapper atualizado de 8.9 para 9.4.1 para compatibilizar com as flags
   `--jvm-version`/`--jvm-vendor` que o Android Studio mais novo passa para a
   task `updateDaemonJvm` (corrige "Unknown command-line option '--jvm-vendor'"
