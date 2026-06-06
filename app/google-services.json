@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "507221549701",
+    "project_id": "watchdraw-gus",
+    "storage_bucket": "watchdraw-gus.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:507221549701:android:baf5a6e52ebadeb27b3fec",
+        "android_client_info": {
+          "package_name": "com.guconstantino.watchdraw"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "507221549701-uemnl16cgd5d8hpo97ji475h4343kdar.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.guconstantino.watchdraw",
+            "certificate_hash": "b38c7c2e456195bfa2d8732460945d0b7a37a199"
+          }
+        },
+        {
+          "client_id": "507221549701-v7sl0rph36mpbdjpui4m3cia5u12h7r8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBR_3MOD14YUDfnd1gm0zaW49T4i-HQ7TU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "507221549701-v7sl0rph36mpbdjpui4m3cia5u12h7r8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

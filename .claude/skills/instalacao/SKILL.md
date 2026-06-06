@@ -63,10 +63,44 @@ instalação manual**, o sync baixa tudo. Principais:
 - `androidx.activity:activity-compose` — `setContent`
 - `androidx.lifecycle:lifecycle-viewmodel-compose` — `viewModel()`
 - `androidx.core:core-ktx`
+- `com.google.android.gms:play-services-auth` — Google Sign-In (Settings)
+- `io.coil-kt:coil-compose` — carregar a foto de perfil do Google
+- Plugin `com.google.gms.google-services` — injeta o `google-services.json`
 
 > **Evite** `androidx.compose.material.icons.*`, `CompactButtonDefaults` e
 > `SwipeToDismissBox` — APIs instáveis nesta versão do Wear Compose. O projeto
 > usa `Box` clicável + `Text`/símbolos no lugar (ver `presentation/`).
+
+---
+
+## 3a. Firebase / Google Sign-In (obrigatório para compilar)
+
+O Settings tem **Login com Google**. O build depende de um
+`app/google-services.json` (ignorado pelo git **não** — é commitado, pois os
+client IDs Android OAuth não são secretos). Para configurar do zero:
+
+1. [Firebase Console](https://console.firebase.google.com) → criar projeto
+   (ex.: `WatchDraw`).
+2. **Adicionar app Android** com package `com.guconstantino.watchdraw`.
+3. **Configurações do projeto → Seus apps → Adicionar impressão digital** e cole
+   o **SHA-1** do keystore. Para o debug keystore:
+   ```powershell
+   & "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -list -v `
+     -keystore "$env:USERPROFILE\.android\debug.keystore" `
+     -alias androiddebugkey -storepass android -keypass android
+   ```
+   > Para a **Play Store**, repita adicionando o SHA-1 da **chave de upload** e o
+   > SHA-1 do **App Signing** (Play Console → Configuração → Integridade do app).
+4. **Baixe o `google-services.json`** (já com o SHA-1) e coloque em `app/`.
+5. **Authentication → Sign-in method → Google → Ativar.**
+
+O plugin `google-services` lê esse JSON e gera `R.string.default_web_client_id`
+(usado em `AuthManager.requestIdToken`). A sessão é persistida pelo Play
+services — `GoogleSignIn.getLastSignedInAccount` sobrevive a reinícios.
+
+> A API `GoogleSignIn` emite *deprecation warnings* (substituída pelo Credential
+> Manager). Continua sendo o caminho estável para Wear OS hoje; os warnings são
+> esperados e não quebram o build.
 
 ---
 

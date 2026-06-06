@@ -8,6 +8,25 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Added
+- **Settings** com **Login com Google** e **Reset All**. O botão é o oficial
+  "Sign in with Google" (pill branca + logo G de 4 cores desenhado via vetor),
+  conforme as diretrizes de marca do Google. Login via `play-services-auth`
+  (`GoogleSignIn`), com o seletor de conta nativo do relógio. A sessão é
+  persistida pelo Play services (`getLastSignedInAccount`). Quando logado, o
+  Settings abre o **Profile**: foto (carregada com Coil), "Hello, {nome}",
+  e-mail, **Sync Now** (placeholder — Toast "Coming soon"), **Reset All** e
+  **Logout**. **Reset All** abre a confirmação **"Caution / This action is
+  irreversible"** (Cancel / Delete All); ao confirmar, apaga My draws, Favorites
+  e Trash (memória + JSON) e mostra **"All files have been removed."**.
+- `AuthManager` (camada de dados): encapsula `GoogleSignInOptions` com
+  `requestIdToken(default_web_client_id)`, login, perfil e logout.
+- `UserProfile` (nome, e-mail, foto) exposto pelo `DrawingViewModel`.
+- Telas `SettingsScreen`, `ProfileScreen`, `ResetConfirmScreen`,
+  `ResetSuccessScreen` e o componente `GoogleSignInButton`.
+- Integração Firebase: plugin `google-services` + `app/google-services.json`,
+  permissão `INTERNET`, regras ProGuard para o Play services auth.
+- Dependências: `com.google.android.gms:play-services-auth` 21.2.0,
+  `io.coil-kt:coil-compose` 2.7.0.
 - **My draws** (galeria de desenhos): os desenhos do usuário são salvos
   automaticamente ao sair do Draw pelo **X** (novo, ou atualiza se veio de Edit)
   e persistidos em disco (JSON em `filesDir`, via `DrawingStore`). A galeria
