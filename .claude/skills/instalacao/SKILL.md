@@ -151,7 +151,47 @@ gh release create v0.1.0 \
 > Neste ambiente macOS, o `gh` pode precisar do token via env var:
 > `GH_TOKEN=$(printf "protocol=https\nhost=github.com\n\n" | git credential fill 2>/dev/null | grep ^password= | cut -d= -f2-) gh release create ...`
 
-### 5c. Commit & push
+### 5c. Publicar na Play Store (release)
+
+O app é assinado com uma **upload key** (Play App Signing). Os segredos ficam em
+`keystore.properties` (raiz) e `app/upload-keystore.jks` — **ambos gitignored**,
+nunca commitados. Em uma máquina nova, recrie/restaure esses dois arquivos a
+partir do seu backup seguro.
+
+`keystore.properties` (modelo):
+```properties
+storeFile=upload-keystore.jks
+storePassword=********
+keyAlias=upload
+keyPassword=********
+```
+
+Gerar o App Bundle assinado (o `.aab` é o que se envia ao Play Console):
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+.\gradlew.bat :app:bundleRelease
+# saída: app/build/outputs/bundle/release/app-release.aab
+```
+
+Pegar o **SHA-1 da upload key** (para registrar no Firebase):
+```powershell
+& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -list -v `
+  -keystore app\upload-keystore.jks -alias upload
+```
+
+Passos no **Google Play Console** (conta de desenvolvedor, US$25 única vez):
+1. **Criar app** → preencher ficha (nome, descrição, ícone, screenshots, etc.).
+2. **Política de Privacidade**: cole a URL do GitHub Pages
+   (`https://guconstantino.github.io/GalaxyWatchDrawing/privacy-policy.html`).
+   O fonte está em `docs/privacy-policy.html`.
+3. Subir o `.aab` numa trilha (Internal testing → Produção).
+4. **Play App Signing** gera a chave final. Em **Configuração → Integridade do
+   app**, copie os **dois** SHA-1 (upload **e** App Signing) e
+   **adicione ambos no Firebase** (Configurações do projeto → Seus apps), senão
+   o Login Google falha na versão publicada. Rebaixe o `google-services.json`.
+5. Como é app de **Wear OS**, marque o form factor Wear OS na ficha.
+
+### 5d. Commit & push
 
 ```bash
 git add -A

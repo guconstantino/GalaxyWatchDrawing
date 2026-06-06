@@ -7,3 +7,8 @@ captures/
 .externalNativeBuild/
 .cxx/
 local.properties
+
+# Release signing — NUNCA commitar
+keystore.properties
+*.jks
+*.keystore
