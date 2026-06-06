@@ -69,8 +69,11 @@ fun HomeScreen(viewModel: DrawingViewModel) {
             content = IconOnContainer,
             icon = { IconHomeFavorite(Modifier.size(26.dp), IconOnContainer) },
             onClick = {
-                // Since favorites feature is a TODO, we can check a filtered list or just show empty for now
-                Toast.makeText(context, "Favorites is empty", Toast.LENGTH_SHORT).show()
+                if (viewModel.favorites.isEmpty()) {
+                    Toast.makeText(context, "Favorites is empty", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.openFavorites()
+                }
             }
         )
         HomeButton(

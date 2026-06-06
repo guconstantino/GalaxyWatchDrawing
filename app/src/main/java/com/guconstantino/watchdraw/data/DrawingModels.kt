@@ -14,7 +14,8 @@ data class Drawing(
     val id: String,
     val createdAt: Long,
     val paths: List<DrawnPath>,
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
+    val isFavorite: Boolean = false
 )
 
 // Exact palette from the Figma "Color Selector" (node 145007:380), in grid order
@@ -32,5 +33,5 @@ val DrawingColors = listOf(
 val StrokeWidths = listOf(3f, 9f, 18f)
 
 enum class AppScreen {
-    Home, MyDraws, Trash, Canvas, StrokePicker, ColorPicker, Actions, ClearConfirm, DeleteConfirm
+    Home, MyDraws, Favorites, Trash, Canvas, StrokePicker, ColorPicker, Actions, ClearConfirm, DeleteConfirm
 }
