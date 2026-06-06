@@ -150,8 +150,16 @@ O Play Console **exige** estes arquivos para publicar. Dá para gerar a partir d
 | **Gráfico de destaque** (feature graphic) | 1024 × 500 px | ✅ |
 | **Capturas Wear OS** | 1:1 (ex.: 384×384) ou 9:16, mín. 1, recomendado 4–8 | ✅ (pelo menos 1 de Wear) |
 
-> Para capturas: rode o app no relógio (ou emulador Wear OS round) e tire prints
-> das telas de desenho, galeria, favoritos e configurações.
+**Capturas já geradas** em `docs/screenshots/` (1152×1152, 1:1 — emulador Wear OS
+round). É só subir estas no Play Console:
+
+| Arquivo | Tela |
+|---|---|
+| `01-home.png` | Menu principal (New draw, My draws…) |
+| `02-canvas.png` | Tela de desenho com cores + barra de ferramentas |
+| `03-colorpicker.png` | Seletor de cores (paleta) |
+| `04-actions.png` | Menu de ações (limpar, exportar, favoritar, fechar) |
+| `05-settings-login.png` | Configurações com login Google + Reset All |
 
 ---
 
