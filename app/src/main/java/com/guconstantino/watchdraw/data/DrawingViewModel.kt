@@ -65,10 +65,19 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
     /** Id of the drawing currently being edited (null = a brand new drawing). */
     private var editingId: String? = null
 
+    /* --------------------------------------------------------------------- *
+     * Settings / Google account
+     * --------------------------------------------------------------------- */
+
+    /** The signed-in Google user, or null if nobody is signed in. */
+    var userProfile by mutableStateOf<UserProfile?>(null)
+        private set
+
     init {
         _myDraws.addAll(DrawingStore.load(app, DRAWS_FILE))
         _trash.addAll(DrawingStore.load(app, TRASH_FILE))
         cleanupTrash()
+        userProfile = AuthManager.lastProfile(app)
     }
 
     private fun cleanupTrash() {
@@ -377,6 +386,50 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun newId(): String =
         System.currentTimeMillis().toString() + "_" + (0..9_999).random()
+
+    /* --------------------------------------------------------------------- *
+     * Settings navigation + account + reset
+     * --------------------------------------------------------------------- */
+
+    /** Opens Settings: the Profile card when signed in, otherwise the login screen. */
+    fun openSettings() {
+        currentScreen = if (userProfile != null) AppScreen.Profile else AppScreen.Settings
+    }
+
+    /** Called by the activity after a successful Google sign-in. */
+    fun onSignedIn(profile: UserProfile) {
+        userProfile = profile
+        currentScreen = AppScreen.Profile
+    }
+
+    /** Signs out and returns to the (logged-out) Settings screen. */
+    fun signOut() {
+        AuthManager.signOut(getApplication()) {
+            userProfile = null
+            currentScreen = AppScreen.Settings
+        }
+    }
+
+    fun openResetConfirm() {
+        currentScreen = AppScreen.ResetConfirm
+    }
+
+    /** Cancels the reset, returning to wherever the user came from. */
+    fun cancelReset() {
+        currentScreen = if (userProfile != null) AppScreen.Profile else AppScreen.Settings
+    }
+
+    /** Permanently deletes every drawing (My draws, Favorites and Trash). */
+    fun resetAllData() {
+        _myDraws.clear()
+        _trash.clear()
+        galleryIndex = 0
+        editingId = null
+        clearCanvas()
+        persist(DRAWS_FILE, _myDraws)
+        persist(TRASH_FILE, _trash)
+        currentScreen = AppScreen.ResetSuccess
+    }
 
     companion object {
         private const val DRAWS_FILE = "my_draws.json"

@@ -42,12 +42,16 @@ import kotlinx.coroutines.launch
  * active menu rendered as a centered modal overlay on top (matching the prototype).
  */
 @Composable
-fun WatchDrawApp(viewModel: DrawingViewModel) {
+fun WatchDrawApp(viewModel: DrawingViewModel, onGoogleSignIn: () -> Unit = {}) {
     when (viewModel.currentScreen) {
         AppScreen.Home -> HomeScreen(viewModel)
         AppScreen.MyDraws -> MyDrawsScreen(viewModel)
         AppScreen.Favorites -> FavoritesScreen(viewModel)
         AppScreen.Trash -> TrashScreen(viewModel)
+        AppScreen.Settings -> SettingsScreen(viewModel, onGoogleSignIn)
+        AppScreen.Profile -> ProfileScreen(viewModel)
+        AppScreen.ResetConfirm -> ResetConfirmScreen(viewModel)
+        AppScreen.ResetSuccess -> ResetSuccessScreen(viewModel)
         else -> Box(modifier = Modifier.fillMaxSize()) {
             DrawingCanvasScreen(viewModel)
             when (viewModel.currentScreen) {

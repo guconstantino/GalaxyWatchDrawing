@@ -94,7 +94,7 @@ fun HomeScreen(viewModel: DrawingViewModel) {
             background = PrimaryContainer,
             content = IconOnContainer,
             icon = { IconHomeSettings(Modifier.size(26.dp), IconOnContainer) },
-            onClick = { /* TODO: feature */ }
+            onClick = { viewModel.openSettings() }
         )
     }
 }
