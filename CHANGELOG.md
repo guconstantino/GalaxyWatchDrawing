@@ -8,6 +8,14 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Added
+- Preparação para a **Play Store**: assinatura de release via **upload key**
+  (`signingConfigs.release` lê `keystore.properties`, ambos os segredos —
+  `keystore.properties` e `*.jks` — gitignored). Gera `.aab` assinado com
+  `:app:bundleRelease`.
+- **Política de Privacidade** (`docs/privacy-policy.html`, PT-BR) para publicar
+  via GitHub Pages — exigida pelo Google por causa do login com conta.
+- Skill `instalacao`: nova seção "Publicar na Play Store" (upload key, AAB,
+  SHA-1 de upload + App Signing, URL da política, form factor Wear OS).
 - **Settings** com **Login com Google** e **Reset All**. O botão é o oficial
   "Sign in with Google" (pill branca + logo G de 4 cores desenhado via vetor),
   conforme as diretrizes de marca do Google. Login via `play-services-auth`
