@@ -45,6 +45,8 @@ import kotlinx.coroutines.launch
 fun WatchDrawApp(viewModel: DrawingViewModel) {
     when (viewModel.currentScreen) {
         AppScreen.Home -> HomeScreen(viewModel)
+        AppScreen.MyDraws -> MyDrawsScreen(viewModel)
+        AppScreen.Trash -> TrashScreen(viewModel)
         else -> Box(modifier = Modifier.fillMaxSize()) {
             DrawingCanvasScreen(viewModel)
             when (viewModel.currentScreen) {
@@ -52,6 +54,7 @@ fun WatchDrawApp(viewModel: DrawingViewModel) {
                 AppScreen.ColorPicker -> ColorMenu(viewModel)
                 AppScreen.Actions -> ActionsMenu(viewModel)
                 AppScreen.ClearConfirm -> ClearConfirmMenu(viewModel)
+                AppScreen.DeleteConfirm -> DeleteConfirmMenu(viewModel)
                 else -> {} // Canvas: no overlay
             }
         }
@@ -230,7 +233,7 @@ private fun ArcButton(
     }
 }
 
-private fun DrawScope.drawSmoothPath(
+internal fun DrawScope.drawSmoothPath(
     points: List<Offset>,
     color: Color,
     strokeWidth: Float

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.wear.compose.material3.Text
 import com.guconstantino.watchdraw.data.AppScreen
 import com.guconstantino.watchdraw.data.DrawingColors
@@ -243,9 +244,9 @@ fun ActionsMenu(viewModel: DrawingViewModel) {
                         viewModel.toggleFavorite()
                     }) { IconHeart(Modifier.size(24.dp), filled = viewModel.favorite) }
 
-                    // Close -> back to Home (tapping outside the menu returns to the drawing)
+                    // Close -> save and go to Home (tapping outside returns to the drawing)
                     SurfaceIconButton(onClick = {
-                        viewModel.currentScreen = AppScreen.Home
+                        viewModel.exitToHome()
                     }) { IconClose(Modifier.size(24.dp)) }
                 }
             }
@@ -259,6 +260,7 @@ fun ActionsMenu(viewModel: DrawingViewModel) {
 
 @Composable
 fun ClearConfirmMenu(viewModel: DrawingViewModel) {
+    val context = LocalContext.current
     MenuOverlay(onDismiss = { viewModel.currentScreen = AppScreen.Canvas }) {
         MenuCard(padding = 12.dp) {
             Column(
@@ -271,6 +273,7 @@ fun ClearConfirmMenu(viewModel: DrawingViewModel) {
                         .background(PrimaryContainer)
                         .clickable {
                             viewModel.clearCanvas()
+                            hapticWarning(context)
                             viewModel.currentScreen = AppScreen.Canvas
                         }
                         .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -285,6 +288,54 @@ fun ClearConfirmMenu(viewModel: DrawingViewModel) {
                 SurfaceIconButton(onClick = {
                     viewModel.currentScreen = AppScreen.Canvas
                 }) { IconClose(Modifier.size(24.dp)) }
+            }
+        }
+    }
+}
+
+@Composable
+fun DeleteConfirmMenu(viewModel: DrawingViewModel) {
+    MenuOverlay(onDismiss = { viewModel.currentScreen = AppScreen.Trash }) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            MenuCard(
+                modifier = Modifier.width(160.dp),
+                padding = 12.dp,
+                background = SurfaceContainer,
+                cornerRadius = 28.dp
+            ) {
+                val context = LocalContext.current
+                Column(
+                    modifier = Modifier.clickable {
+                        viewModel.permanentDeleteCurrentTrash()
+                        hapticWarning(context)
+                        viewModel.currentScreen = AppScreen.Trash
+                    },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Permanent",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "delete",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            SurfaceIconButton(
+                onClick = { viewModel.currentScreen = AppScreen.Trash },
+                background = SurfaceContainer
+            ) {
+                IconX(Modifier.size(24.dp))
             }
         }
     }
