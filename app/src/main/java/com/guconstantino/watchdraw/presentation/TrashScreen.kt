@@ -137,7 +137,7 @@ fun TrashScreen(viewModel: DrawingViewModel) {
                 val inset = 5.dp.toPx() + strokeW / 2f
                 val arcSize = Size(size.width - 2 * inset, size.height - 2 * inset)
                 val topLeft = Offset(inset, inset)
-                val gapBottom = 64f
+                val gapBottom = 160f
                 val totalSweep = 360f - gapBottom
                 val startAngle = 90f + gapBottom / 2f
                 val segGap = if (count > 1) 4f else 0f
@@ -155,32 +155,29 @@ fun TrashScreen(viewModel: DrawingViewModel) {
                 }
             }
 
-            // Controls
-            // Left: Permanent Delete
+            // Controls — outer buttons at (±60, -48), center at (0, 0) from BottomCenter.
             ArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = (-48).dp, y = (-30).dp),
+                    .offset(x = (-60).dp, y = (-48).dp),
                 background = TrashIconBg,
                 onClick = { viewModel.currentScreen = AppScreen.DeleteConfirm }
             ) { IconDeletePermanent(Modifier.size(24.dp)) }
 
-            // Center: Restore
             ArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(y = (-6).dp),
+                    .offset(x = 0.dp, y = 0.dp),
                 onClick = {
                     viewModel.restoreCurrentTrash()
                     hapticSuccess(context)
                 }
             ) { IconRestore(Modifier.size(24.dp)) }
 
-            // Right: Edit (Save as new)
             ArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = 48.dp, y = (-30).dp),
+                    .offset(x = 60.dp, y = (-48).dp),
                 onClick = { viewModel.editTrashAsNew() }
             ) { IconEdit(Modifier.size(24.dp)) }
         }
@@ -218,7 +215,7 @@ fun TrashScreen(viewModel: DrawingViewModel) {
 @Composable
 private fun ArcIconButton(
     modifier: Modifier = Modifier,
-    background: Color = PrimaryContainer,
+    background: Color = SurfaceContainer,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {

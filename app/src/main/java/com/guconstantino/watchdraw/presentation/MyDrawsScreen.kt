@@ -144,7 +144,7 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                 val inset = 5.dp.toPx() + strokeW / 2f
                 val arcSize = Size(size.width - 2 * inset, size.height - 2 * inset)
                 val topLeft = Offset(inset, inset)
-                val gapBottom = 64f
+                val gapBottom = 160f
                 val totalSweep = 360f - gapBottom
                 val startAngle = 90f + gapBottom / 2f
                 val segGap = if (count > 1) 4f else 0f
@@ -162,22 +162,23 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                 }
             }
 
-            // Controls (4 buttons in a downward arc).
+            // Controls — positions from Figma node 144969:301 (192dp canvas, 1:1).
+            // Outer buttons at (±60, -48), inner buttons at (±24, 0) from BottomCenter.
             ArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = (-66).dp, y = (-16).dp),
+                    .offset(x = (-60).dp, y = (-48).dp),
                 onClick = {
                     viewModel.deleteCurrentGalleryToTrash()
                     hapticWarning(context)
                     showDeletedMsg = true
                 }
-            ) { IconTrash(Modifier.size(22.dp)) }
+            ) { IconTrash(Modifier.size(24.dp)) }
 
             ArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = (-28).dp, y = (-38).dp),
+                    .offset(x = (-24).dp, y = 0.dp),
                 onClick = {
                     val bmp = renderPathsBitmap(drawing.paths, viewModel.canvasSize)
                     val ok = saveDrawingToGallery(context, bmp)
@@ -187,24 +188,24 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            ) { IconDownload(Modifier.size(22.dp)) }
+            ) { IconDownload(Modifier.size(24.dp)) }
 
             ArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = 28.dp, y = (-38).dp),
+                    .offset(x = 24.dp, y = 0.dp),
                 onClick = {
                     viewModel.favoriteCurrentGallery()
                     hapticSuccess(context)
                 }
-            ) { IconHeart(Modifier.size(22.dp), filled = false) }
+            ) { IconHeart(Modifier.size(24.dp), filled = false) }
 
             ArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = 66.dp, y = (-16).dp),
+                    .offset(x = 60.dp, y = (-48).dp),
                 onClick = { viewModel.editCurrentGallery() }
-            ) { IconEdit(Modifier.size(22.dp)) }
+            ) { IconEdit(Modifier.size(24.dp)) }
         }
 
         // "Deleted" overlay
@@ -260,7 +261,7 @@ private fun ArcIconButton(
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(PrimaryContainer),
+                .background(SurfaceContainer),
             contentAlignment = Alignment.Center
         ) {
             content()
