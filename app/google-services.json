@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "507221549701-44ponpgee21872nmd3bcuoa4qpa1prep.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.guconstantino.watchdraw",
+            "certificate_hash": "2f9deaeacc9eda63c06d81fb32b4cdee7337a373"
+          }
+        },
+        {
           "client_id": "507221549701-uemnl16cgd5d8hpo97ji475h4343kdar.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
