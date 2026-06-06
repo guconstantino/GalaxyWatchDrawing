@@ -46,6 +46,7 @@ fun WatchDrawApp(viewModel: DrawingViewModel) {
     when (viewModel.currentScreen) {
         AppScreen.Home -> HomeScreen(viewModel)
         AppScreen.MyDraws -> MyDrawsScreen(viewModel)
+        AppScreen.Favorites -> FavoritesScreen(viewModel)
         AppScreen.Trash -> TrashScreen(viewModel)
         else -> Box(modifier = Modifier.fillMaxSize()) {
             DrawingCanvasScreen(viewModel)

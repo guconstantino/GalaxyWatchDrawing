@@ -44,10 +44,11 @@ object DrawingStore {
                     )
                 }
                 out.add(Drawing(
-                    o.getString("id"),
-                    o.getLong("createdAt"),
-                    paths,
-                    if (o.has("deletedAt")) o.getLong("deletedAt") else null
+                    id = o.getString("id"),
+                    createdAt = o.getLong("createdAt"),
+                    paths = paths,
+                    deletedAt = if (o.has("deletedAt")) o.getLong("deletedAt") else null,
+                    isFavorite = o.optBoolean("isFavorite", false)
                 ))
             }
             out
@@ -63,6 +64,7 @@ object DrawingStore {
             o.put("id", d.id)
             o.put("createdAt", d.createdAt)
             if (d.deletedAt != null) o.put("deletedAt", d.deletedAt)
+            if (d.isFavorite) o.put("isFavorite", true)
             val pathsArr = JSONArray()
             for (p in d.paths) {
                 val po = JSONObject()

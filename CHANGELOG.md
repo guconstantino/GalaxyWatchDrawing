@@ -23,6 +23,11 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   (abre `DeleteConfirmMenu`), **Restore** (devolve para My draws) e **Edit**
   (reabre para editar como novo desenho). Desenhos expiram automaticamente após
   **30 dias** na lixeira (limpeza automática no `init` do ViewModel).
+- **Tela Favorites** (favoritos): galeria de desenhos marcados como favoritos,
+  idêntica à My draws na navegação (girar/arrastar com tick háptico). Controles
+  em arco de 4 botões: **Trash** (envia para lixeira), **Desmarcar** (coração
+  preenchido → remove dos favoritos e move o desenho de volta para My draws com
+  feedback `hapticSuccess` e overlay "Unfavorited"), **Download** e **Edit**.
 - `DeleteConfirmMenu`: modal de confirmação para exclusão permanente de um item
   da lixeira (card vermelho + botão X para cancelar).
 - Novos ícones em `MenuIcons.kt`: `IconDeletePermanent` (lixeira), `IconRestore`
@@ -32,8 +37,8 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   `hapticWarning` (pulso longo para ações de delete).
 - **Tela Home** (Figma node 144969:299): menu vertical rolável com 5 botões
   (New draw, My draws, Favorites, Trash, Settings), ícones a partir dos SVGs
-  exatos do Figma. O app agora **inicia na Home**. **New draw**, **My draws** e
-  **Trash** são funcionais; Favorites e Settings exibem Toast de placeholder.
+  exatos do Figma. O app agora **inicia na Home**. **New draw**, **My draws**,
+  **Favorites** e **Trash** são funcionais; Settings exibe Toast de placeholder.
 - Navegação Home↔Draw: no menu de ações, o **X volta para a Home** e **tocar
   fora (scrim) volta para o desenho**.
 - Skill `instalacao` (`.claude/skills/instalacao`) com guia de setup do repo,
@@ -91,8 +96,15 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   ser reutilizável nas galerias My draws e Trash sem depender do ViewModel.
 - `drawSmoothPath` alterado de `private` para `internal` para ser acessível
   em `MyDrawsScreen` e `TrashScreen`.
-- Botões **My draws** e **Trash** na Home agora funcionais (antes eram `TODO`);
+- Botões **My draws**, **Favorites** e **Trash** na Home agora funcionais;
   exibem Toast informativo quando a lista está vazia.
+- `Drawing` agora tem campo `isFavorite: Boolean` (padrão `false`); persistido
+  em `my_draws.json`. Favoritos e desenhos regulares compartilham o mesmo arquivo.
+- My draws agora exibe apenas desenhos **não-favoritos**, ordenados por
+  `createdAt` decrescente (mais recente primeiro).
+- My draws ganha botão de **favoritar** (coração vazio) no arco de controles,
+  agora com 4 botões: Trash | Favoritar | Download | Edit. Ao favoritar, o
+  desenho sai de My draws e aparece em Favorites.
 - Fechar o menu de ações pelo **X** agora salva o desenho automaticamente antes
   de retornar à Home (via `exitToHome()`).
 - Vibração háptica `hapticWarning` adicionada ao confirmar limpeza do canvas.

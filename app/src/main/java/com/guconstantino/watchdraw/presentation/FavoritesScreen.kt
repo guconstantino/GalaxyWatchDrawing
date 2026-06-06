@@ -44,22 +44,21 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
 
-private val CrownActive = Color(0xFFE2E2E2)
-private val CrownInactive = Color(0xFF5A5C5C)
+private val FavCrownActive = Color(0xFFE2E2E2)
+private val FavCrownInactive = Color(0xFF5A5C5C)
 
 /**
- * "My draws" gallery. Shows one saved drawing at a time, a segmented crown around
- * the bezel (one segment per drawing, the current one highlighted), and Delete /
- * Download / Edit controls. Rotate a finger around the screen to move between
- * drawings (clockwise = next, counter-clockwise = previous).
+ * Favorites gallery. Identical layout to MyDrawsScreen but shows only favorited drawings.
+ * Buttons: Trash | Unfavorite (filled heart) | Download | Edit.
+ * Rotating or dragging navigates between favorites; back returns to Home.
  */
 @Composable
-fun MyDrawsScreen(viewModel: DrawingViewModel) {
-    // Back gesture / physical back button -> Home.
+fun FavoritesScreen(viewModel: DrawingViewModel) {
     BackHandler { viewModel.currentScreen = AppScreen.Home }
 
-    val drawing = viewModel.currentGalleryDrawing
+    val drawing = viewModel.currentFavoriteDrawing
     val context = LocalContext.current
+    var showUnfavMsg by remember { mutableStateOf(false) }
     var showDeletedMsg by remember { mutableStateOf(false) }
 
     Box(
@@ -68,7 +67,6 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
             .background(Color.Black)
     ) {
         if (drawing != null) {
-            // The saved drawing, read-only, plus the circular navigation gesture.
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
@@ -78,10 +76,10 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                         val cy = size.height / 2f
                         val pi = PI.toFloat()
                         val twoPi = (2 * PI).toFloat()
-                        val rotStep = pi / 6f          // ~30° of rotation per drawing
-                        val vStep = 64.dp.toPx()       // ~64dp of vertical drag per drawing
+                        val rotStep = pi / 6f
+                        val vStep = 64.dp.toPx()
                         val slop = 12.dp.toPx()
-                        var mode = 0                   // 0 = undecided, 1 = vertical, 2 = circular
+                        var mode = 0
                         var start = Offset.Zero
                         var accum = 0f
                         detectDragGestures(
@@ -94,32 +92,32 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                                     }
                                 }
                                 when (mode) {
-                                    1 -> { // vertical: up = next, down = previous
+                                    1 -> {
                                         accum += change.position.y - change.previousPosition.y
                                         while (accum <= -vStep) {
-                                            viewModel.galleryNext()
+                                            viewModel.favoriteNext()
                                             hapticScrollTick(context)
                                             accum += vStep
                                         }
                                         while (accum >= vStep) {
-                                            viewModel.galleryPrev()
+                                            viewModel.favoritePrev()
                                             hapticScrollTick(context)
                                             accum -= vStep
                                         }
                                     }
-                                    2 -> { // circular: clockwise = next, counter-clockwise = previous
+                                    2 -> {
                                         val a1 = atan2(change.previousPosition.y - cy, change.previousPosition.x - cx)
                                         val a2 = atan2(change.position.y - cy, change.position.x - cx)
                                         var d = a2 - a1
                                         if (d > pi) d -= twoPi else if (d < -pi) d += twoPi
                                         accum += d
                                         while (accum >= rotStep) {
-                                            viewModel.galleryNext()
+                                            viewModel.favoriteNext()
                                             hapticScrollTick(context)
                                             accum -= rotStep
                                         }
                                         while (accum <= -rotStep) {
-                                            viewModel.galleryPrev()
+                                            viewModel.favoritePrev()
                                             hapticScrollTick(context)
                                             accum += rotStep
                                         }
@@ -135,8 +133,8 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                 }
             }
 
-            // Segmented crown around the bezel (gap at the bottom for the controls).
-            val count = viewModel.myDraws.size
+            // Segmented crown
+            val count = viewModel.favorites.size
             val index = viewModel.galleryIndex
             Canvas(modifier = Modifier.fillMaxSize()) {
                 if (count <= 0) return@Canvas
@@ -151,7 +149,7 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                 val segSweep = (totalSweep - segGap * count) / count
                 for (i in 0 until count) {
                     drawArc(
-                        color = if (i == index) CrownActive else CrownInactive,
+                        color = if (i == index) FavCrownActive else FavCrownInactive,
                         startAngle = startAngle + i * (segSweep + segGap),
                         sweepAngle = segSweep,
                         useCenter = false,
@@ -162,29 +160,30 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                 }
             }
 
-            // Controls (4 buttons in a downward arc).
-            ArcIconButton(
+            // Controls: Trash | Unfavorite | Download | Edit
+            FavArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .offset(x = (-66).dp, y = (-16).dp),
                 onClick = {
-                    viewModel.deleteCurrentGalleryToTrash()
+                    viewModel.deleteCurrentFavoriteToTrash()
                     hapticWarning(context)
                     showDeletedMsg = true
                 }
             ) { IconTrash(Modifier.size(22.dp)) }
 
-            ArcIconButton(
+            FavArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .offset(x = (-28).dp, y = (-38).dp),
                 onClick = {
-                    viewModel.favoriteCurrentGallery()
+                    viewModel.unfavoriteCurrentFavorite()
                     hapticSuccess(context)
+                    showUnfavMsg = true
                 }
-            ) { IconHeart(Modifier.size(22.dp), filled = false) }
+            ) { IconHeart(Modifier.size(22.dp), filled = true) }
 
-            ArcIconButton(
+            FavArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .offset(x = 28.dp, y = (-38).dp),
@@ -199,20 +198,47 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                 }
             ) { IconDownload(Modifier.size(22.dp)) }
 
-            ArcIconButton(
+            FavArcIconButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .offset(x = 66.dp, y = (-16).dp),
-                onClick = { viewModel.editCurrentGallery() }
+                onClick = { viewModel.editCurrentFavorite() }
             ) { IconEdit(Modifier.size(22.dp)) }
         }
 
+        // "Unfavorited" overlay
+        AnimatedVisibility(visible = showUnfavMsg, enter = fadeIn(), exit = fadeOut()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.6f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(SurfaceCard)
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = "Unfavorited",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+            LaunchedEffect(Unit) {
+                delay(800)
+                showUnfavMsg = false
+                if (viewModel.favorites.isEmpty()) {
+                    viewModel.currentScreen = AppScreen.Home
+                }
+            }
+        }
+
         // "Deleted" overlay
-        AnimatedVisibility(
-            visible = showDeletedMsg,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
+        AnimatedVisibility(visible = showDeletedMsg, enter = fadeIn(), exit = fadeOut()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -236,7 +262,7 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
             LaunchedEffect(Unit) {
                 delay(800)
                 showDeletedMsg = false
-                if (viewModel.myDraws.isEmpty()) {
+                if (viewModel.favorites.isEmpty()) {
                     viewModel.currentScreen = AppScreen.Home
                 }
             }
@@ -245,7 +271,7 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
 }
 
 @Composable
-private fun ArcIconButton(
+private fun FavArcIconButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     content: @Composable () -> Unit

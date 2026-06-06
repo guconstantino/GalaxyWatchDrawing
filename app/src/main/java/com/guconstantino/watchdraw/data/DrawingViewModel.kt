@@ -41,16 +41,24 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
         private set
 
     /* --------------------------------------------------------------------- *
-     * Saved drawings (My draws) + Trash
+     * Saved drawings (My draws) + Favorites + Trash
      * --------------------------------------------------------------------- */
 
+    // All non-deleted drawings (both regular and favorites).
     private val _myDraws = mutableStateListOf<Drawing>()
-    val myDraws: List<Drawing> get() = _myDraws
+
+    // My draws: non-favorite drawings ordered newest-first.
+    val myDraws: List<Drawing>
+        get() = _myDraws.filter { !it.isFavorite }.sortedByDescending { it.createdAt }
+
+    // Favorites: favorite drawings ordered newest-first.
+    val favorites: List<Drawing>
+        get() = _myDraws.filter { it.isFavorite }.sortedByDescending { it.createdAt }
 
     private val _trash = mutableStateListOf<Drawing>()
     val trash: List<Drawing> get() = _trash
 
-    /** Index of the drawing shown in the My draws gallery. */
+    /** Shared gallery index — reset by each screen's open function. */
     var galleryIndex by mutableStateOf(0)
         private set
 
@@ -155,21 +163,24 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
         currentScreen = AppScreen.Home
     }
 
-    /** Opens the My draws gallery (no-op if there are no saved drawings yet). */
+    /** Opens the My draws gallery (no-op if there are no non-favorite drawings). */
     fun openMyDraws() {
-        if (_myDraws.isEmpty()) return
-        galleryIndex = galleryIndex.coerceIn(0, _myDraws.lastIndex)
+        val draws = myDraws
+        if (draws.isEmpty()) return
+        galleryIndex = galleryIndex.coerceIn(0, draws.lastIndex)
         currentScreen = AppScreen.MyDraws
     }
 
-    val currentGalleryDrawing: Drawing? get() = _myDraws.getOrNull(galleryIndex)
+    val currentGalleryDrawing: Drawing? get() = myDraws.getOrNull(galleryIndex)
 
     fun galleryNext() {
-        if (_myDraws.size > 1) galleryIndex = (galleryIndex + 1) % _myDraws.size
+        val size = myDraws.size
+        if (size > 1) galleryIndex = (galleryIndex + 1) % size
     }
 
     fun galleryPrev() {
-        if (_myDraws.size > 1) galleryIndex = (galleryIndex - 1 + _myDraws.size) % _myDraws.size
+        val size = myDraws.size
+        if (size > 1) galleryIndex = (galleryIndex - 1 + size) % size
     }
 
     /** Opens the selected gallery drawing in the canvas for editing. */
@@ -183,17 +194,102 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
         currentScreen = AppScreen.Canvas
     }
 
-    /** Moves the selected gallery drawing to the Trash. */
+    /** Moves the selected My draws drawing to the Trash. */
     fun deleteCurrentGalleryToTrash() {
-        if (galleryIndex !in _myDraws.indices) return
-        val d = _myDraws.removeAt(galleryIndex).copy(deletedAt = System.currentTimeMillis())
-        _trash.add(0, d)
+        val d = currentGalleryDrawing ?: return
+        val rawIdx = _myDraws.indexOfFirst { it.id == d.id }
+        if (rawIdx < 0) return
+        val deleted = _myDraws.removeAt(rawIdx).copy(deletedAt = System.currentTimeMillis(), isFavorite = false)
+        _trash.add(0, deleted)
         persist(DRAWS_FILE, _myDraws)
         persist(TRASH_FILE, _trash)
-        if (_myDraws.isEmpty()) {
+        val remaining = myDraws
+        if (remaining.isEmpty()) {
             currentScreen = AppScreen.Home
         } else {
-            galleryIndex = galleryIndex.coerceIn(0, _myDraws.lastIndex)
+            galleryIndex = galleryIndex.coerceIn(0, remaining.lastIndex)
+        }
+    }
+
+    /* --------------------------------------------------------------------- *
+     * Favorites interactions
+     * --------------------------------------------------------------------- */
+
+    /** Opens the Favorites gallery (no-op if there are no favorites). */
+    fun openFavorites() {
+        val favs = favorites
+        if (favs.isEmpty()) return
+        galleryIndex = 0
+        currentScreen = AppScreen.Favorites
+    }
+
+    val currentFavoriteDrawing: Drawing? get() = favorites.getOrNull(galleryIndex)
+
+    fun favoriteNext() {
+        val size = favorites.size
+        if (size > 1) galleryIndex = (galleryIndex + 1) % size
+    }
+
+    fun favoritePrev() {
+        val size = favorites.size
+        if (size > 1) galleryIndex = (galleryIndex - 1 + size) % size
+    }
+
+    /** Marks the current My draws drawing as favorite (moves it to Favorites view). */
+    fun favoriteCurrentGallery() {
+        val d = currentGalleryDrawing ?: return
+        val rawIdx = _myDraws.indexOfFirst { it.id == d.id }
+        if (rawIdx < 0) return
+        _myDraws[rawIdx] = _myDraws[rawIdx].copy(isFavorite = true)
+        persist(DRAWS_FILE, _myDraws)
+        val remaining = myDraws
+        if (remaining.isEmpty()) {
+            currentScreen = AppScreen.Home
+        } else {
+            galleryIndex = galleryIndex.coerceIn(0, remaining.lastIndex)
+        }
+    }
+
+    /** Unmarks the current Favorites drawing (moves it back to My draws view). */
+    fun unfavoriteCurrentFavorite() {
+        val d = currentFavoriteDrawing ?: return
+        val rawIdx = _myDraws.indexOfFirst { it.id == d.id }
+        if (rawIdx < 0) return
+        _myDraws[rawIdx] = _myDraws[rawIdx].copy(isFavorite = false)
+        persist(DRAWS_FILE, _myDraws)
+        val remaining = favorites
+        if (remaining.isEmpty()) {
+            currentScreen = AppScreen.Home
+        } else {
+            galleryIndex = galleryIndex.coerceIn(0, remaining.lastIndex)
+        }
+    }
+
+    /** Opens the current Favorites drawing in the canvas for editing. */
+    fun editCurrentFavorite() {
+        val d = currentFavoriteDrawing ?: return
+        editingId = d.id
+        _drawnPaths.clear()
+        _drawnPaths.addAll(d.paths)
+        _undonePaths.clear()
+        currentPoints = emptyList()
+        currentScreen = AppScreen.Canvas
+    }
+
+    /** Moves the current Favorites drawing to the Trash. */
+    fun deleteCurrentFavoriteToTrash() {
+        val d = currentFavoriteDrawing ?: return
+        val rawIdx = _myDraws.indexOfFirst { it.id == d.id }
+        if (rawIdx < 0) return
+        val deleted = _myDraws.removeAt(rawIdx).copy(deletedAt = System.currentTimeMillis(), isFavorite = false)
+        _trash.add(0, deleted)
+        persist(DRAWS_FILE, _myDraws)
+        persist(TRASH_FILE, _trash)
+        val remaining = favorites
+        if (remaining.isEmpty()) {
+            currentScreen = AppScreen.Home
+        } else {
+            galleryIndex = galleryIndex.coerceIn(0, remaining.lastIndex)
         }
     }
 
