@@ -179,16 +179,6 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                     .align(Alignment.BottomCenter)
                     .offset(x = (-28).dp, y = (-38).dp),
                 onClick = {
-                    viewModel.favoriteCurrentGallery()
-                    hapticSuccess(context)
-                }
-            ) { IconHeart(Modifier.size(22.dp), filled = false) }
-
-            ArcIconButton(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(x = 28.dp, y = (-38).dp),
-                onClick = {
                     val bmp = renderPathsBitmap(drawing.paths, viewModel.canvasSize)
                     val ok = saveDrawingToGallery(context, bmp)
                     Toast.makeText(
@@ -198,6 +188,16 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                     ).show()
                 }
             ) { IconDownload(Modifier.size(22.dp)) }
+
+            ArcIconButton(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(x = 28.dp, y = (-38).dp),
+                onClick = {
+                    viewModel.favoriteCurrentGallery()
+                    hapticSuccess(context)
+                }
+            ) { IconHeart(Modifier.size(22.dp), filled = false) }
 
             ArcIconButton(
                 modifier = Modifier

@@ -177,17 +177,6 @@ fun FavoritesScreen(viewModel: DrawingViewModel) {
                     .align(Alignment.BottomCenter)
                     .offset(x = (-28).dp, y = (-38).dp),
                 onClick = {
-                    viewModel.unfavoriteCurrentFavorite()
-                    hapticSuccess(context)
-                    showUnfavMsg = true
-                }
-            ) { IconHeart(Modifier.size(22.dp), filled = true) }
-
-            FavArcIconButton(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(x = 28.dp, y = (-38).dp),
-                onClick = {
                     val bmp = renderPathsBitmap(drawing.paths, viewModel.canvasSize)
                     val ok = saveDrawingToGallery(context, bmp)
                     Toast.makeText(
@@ -197,6 +186,17 @@ fun FavoritesScreen(viewModel: DrawingViewModel) {
                     ).show()
                 }
             ) { IconDownload(Modifier.size(22.dp)) }
+
+            FavArcIconButton(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(x = 28.dp, y = (-38).dp),
+                onClick = {
+                    viewModel.unfavoriteCurrentFavorite()
+                    hapticSuccess(context)
+                    showUnfavMsg = true
+                }
+            ) { IconHeart(Modifier.size(22.dp), filled = true) }
 
             FavArcIconButton(
                 modifier = Modifier
