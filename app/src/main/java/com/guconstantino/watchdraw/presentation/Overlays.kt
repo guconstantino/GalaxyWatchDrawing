@@ -1,6 +1,5 @@
 package com.guconstantino.watchdraw.presentation
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -19,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -213,6 +213,7 @@ fun ColorMenu(viewModel: DrawingViewModel) {
 @Composable
 fun ActionsMenu(viewModel: DrawingViewModel) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     MenuOverlay(onDismiss = { viewModel.currentScreen = AppScreen.Canvas }) {
         MenuCard(padding = 12.dp, background = SurfaceContainer, cornerRadius = 26.dp) {
@@ -226,15 +227,10 @@ fun ActionsMenu(viewModel: DrawingViewModel) {
                         viewModel.currentScreen = AppScreen.ClearConfirm
                     }) { IconTrash(Modifier.size(24.dp)) }
 
-                    // Download -> save the drawing as PNG to the gallery
+                    // Download -> save locally + (if signed in) sync to Google Photos
                     SurfaceIconButton(onClick = {
                         val bmp = renderDrawingBitmap(viewModel, viewModel.canvasSize)
-                        val ok = saveDrawingToGallery(context, bmp)
-                        Toast.makeText(
-                            context,
-                            if (ok) "Saved to gallery" else "Save failed",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        downloadDrawing(context, scope, bmp)
                         viewModel.currentScreen = AppScreen.Canvas
                     }) { IconDownload(Modifier.size(24.dp)) }
                 }
