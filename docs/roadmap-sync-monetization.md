@@ -173,20 +173,38 @@ Tela de relógio: péssima UX, payout irrisório. Mata o charme. Descartado.
 
 ## Pré-requisitos técnicos do sync (checklist)
 
-- [ ] Adicionar escopo `photoslibrary.appendonly` ao Google Sign-In existente
+- [x] Adicionar escopo `photoslibrary.appendonly` ao Google Sign-In existente
 - [ ] Iniciar **verificação OAuth** do Google (sensível) — fazer cedo, leva tempo
-- [ ] Implementar fila offline persistente (estados PENDING/UPLOADING/SYNCED/FAILED)
-- [ ] Implementar gatilhos de auto-sync (download, reconexão, launch)
-- [ ] Estados de UI por desenho + botão "Sync Now" com override manual
+- [x] Implementar fila offline persistente (`SyncQueue`: PNGs em disco + índice JSON)
+- [x] Implementar gatilhos de auto-sync (download, login, launch)
+- [x] Botão "Sync Now" com override manual (contagem + spinner + estado desabilitado)
+- [ ] Estados de UI **por desenho** (ícone de nuvem) — exige vínculo fila↔desenho
+- [ ] Evitar duplicatas (não subir 2x a mesma imagem)
 - [ ] (Opcional) criar álbum "WatchDraw" no Photos
-- [ ] **Atualizar Política de Privacidade + Data Safety**: "imagens exportadas vão para o
-      seu Google Photos" (hoje declara local-only)
+- [x] **Atualizar Política de Privacidade**: declara upload pro Google Photos do usuário
+- [ ] **Atualizar Data Safety** (Play/Galaxy Console): declarar o upload pro Photos
+
+---
+
+## Status (jun/2026)
+
+**Já no `main`:**
+- Sync para Google Photos no Download (logado) — testado em Galaxy Watch real
+- Fila offline persistente + auto-retry (init/login/download)
+- Botão "Sync Now" (contagem, spinner durante upload, desabilitado quando vazio)
+- Política de privacidade atualizada (PT→EN + cláusula do Google Photos)
+
+**Falta:**
+- 🔴 Verificação OAuth (gargalo de calendário) — atualizar Data Safety, gravar vídeo, submeter
+- 🟡 Ícone de nuvem por desenho + dedup
+- 🟢 Trava de Pro + IAP (pagamento único)
 
 ---
 
 ## Próximos passos em aberto (para retomar)
 
 - Definir a **linha de corte free vs. Pro** (o que maximiza conversão sem irritar).
-- Escrever a **especificação técnica** detalhada do sync (estrutura da fila, persistência,
-  política de retry/backoff, IDs de dedup).
+- Implementar **ícone de nuvem por desenho** (vínculo fila↔desenho + set de já-sincronizados).
 - Planejar o **processo de verificação OAuth** passo a passo.
+- **Data Safety** (console): com o sync, "Photos and videos" agora também é **enviado**
+  (shared = No; collected/uploaded = Yes, App functionality).

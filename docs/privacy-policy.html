@@ -24,7 +24,7 @@
 </head>
 <body>
   <h1>Privacy Policy — WatchDraw</h1>
-  <p class="updated">Last updated: June 5, 2026</p>
+  <p class="updated">Last updated: June 6, 2026</p>
 
   <p>
     <strong>WatchDraw</strong> is a drawing app for Wear OS
@@ -55,29 +55,59 @@
   <p>
     All the drawings you create (including Favorites and Trash) are stored
     <strong>locally on your device</strong>, in the app's private storage.
-    They are <strong>not uploaded</strong> to our servers or to any third
-    party. Images you choose to export ("Download") are saved to your device's
-    own gallery, by your action.
+    They are <strong>not uploaded to our servers</strong> — we do not operate
+    any server that stores your drawings. Images you choose to export
+    ("Download") are saved to your device's own gallery, by your action.
   </p>
 
-  <h2>3. How we use the data</h2>
+  <h2>3. Saving drawings to your Google Photos</h2>
+  <p>
+    If you are signed in with a Google Account, tapping <strong>"Download"</strong>
+    on a drawing also uploads that single image to <strong>your own Google
+    Photos library</strong>, so you can view and share it on your phone. This
+    happens only for drawings you explicitly export, and only while you are
+    signed in.
+  </p>
+  <ul>
+    <li>
+      The upload uses the Google Photos <code>photoslibrary.appendonly</code>
+      permission, which lets the app <strong>add</strong> images it creates to
+      your library. The app <strong>cannot read, browse, or access</strong> the
+      photos already in your Google Photos.
+    </li>
+    <li>
+      The images go to <strong>your</strong> Google account — we do not receive
+      a copy and have no server that stores them.
+    </li>
+    <li>
+      If the watch is offline, the export is queued on the device and uploaded
+      later when a connection is available (or when you tap "Sync Now").
+    </li>
+    <li>
+      If you are <strong>not</strong> signed in, nothing is uploaded — drawings
+      stay only on the device.
+    </li>
+  </ul>
+
+  <h2>4. How we use the data</h2>
   <ul>
     <li>Authenticate you via Google Sign-In (when you choose to sign in);</li>
     <li>Display your name, email, and photo on the profile screen;</li>
-    <li>Keep your session active across app restarts.</li>
+    <li>Keep your session active across app restarts;</li>
+    <li>Upload drawings you export to your own Google Photos (when signed in).</li>
   </ul>
   <p>We do not use your data for advertising, nor do we sell it to third parties.</p>
 
-  <h2>4. Sharing</h2>
+  <h2>5. Sharing</h2>
   <p>
-    We do not share your personal data with third parties. Authentication is
-    handled by Google's services (Google Play Services / Google Sign-In),
-    subject to the
+    We do not share your personal data with third parties. Authentication and
+    the Google Photos upload are handled by Google's services (Google Play
+    Services / Google Sign-In / Google Photos), subject to the
     <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">
     Google Privacy Policy</a>.
   </p>
 
-  <h2>5. Retention and deletion</h2>
+  <h2>6. Retention and deletion</h2>
   <ul>
     <li>
       Your Google account data is available in the app only while you are
@@ -86,32 +116,39 @@
     </li>
     <li>
       The <strong>Reset All</strong> option (Settings) permanently deletes
-      all drawings stored on the device.
+      all drawings stored on the device, including any that were still
+      waiting to be uploaded.
+    </li>
+    <li>
+      Drawings already uploaded to your Google Photos live in
+      <strong>your own</strong> Google account; you can delete them at any time
+      from the Google Photos app, like any other photo.
     </li>
     <li>
       Uninstalling the app removes all local data associated with it.
     </li>
   </ul>
 
-  <h2>6. Security</h2>
+  <h2>7. Security</h2>
   <p>
     Data is kept in the app's private storage, protected by the Android system.
-    The sign-in session is managed by Google Play Services.
+    The sign-in session is managed by Google Play Services, and uploads to
+    Google Photos are sent over an encrypted (HTTPS) connection.
   </p>
 
-  <h2>7. Children</h2>
+  <h2>8. Children</h2>
   <p>
     WatchDraw is not intended for children under 13 and does not knowingly
     collect data from such children.
   </p>
 
-  <h2>8. Changes to this policy</h2>
+  <h2>9. Changes to this policy</h2>
   <p>
     We may update this policy from time to time. The "last updated" date at
     the top indicates the current version.
   </p>
 
-  <h2>9. Contact</h2>
+  <h2>10. Contact</h2>
   <p>
     Questions about privacy? Get in touch:
     <a href="mailto:hello.gustavoconstantino@gmail.com">hello.gustavoconstantino@gmail.com</a>.
