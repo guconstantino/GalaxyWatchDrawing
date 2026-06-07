@@ -8,7 +8,18 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
 
 ## [Unreleased]
 
-_Sem mudanças não lançadas._
+### Added
+- **Badge de nuvem por desenho** nas galerias My draws e Favorites: mostra o
+  status de sincronização com o Google Photos de cada desenho — **âmbar**
+  (pendente/na fila), **vermelho** (falhou) ou **verde** (sincronizado). Some
+  quando o desenho nunca foi baixado ou o usuário está deslogado.
+- Vínculo fila↔desenho: itens da `SyncQueue` carregam o `drawingId`, e um
+  conjunto persistente de ids já sincronizados (`synced_ids.json`) mantém o
+  badge correto após o upload (que remove o item da fila).
+- `DrawingViewModel.syncStatusFor(id)` e `commitCurrentDrawingForDownload()`
+  (o Download no canvas agora salva o desenho em My draws para vincular o badge).
+- Ícones `IconCloudDone` / `IconCloudUpload` / `IconCloudOff` e o componente
+  `CloudStatusBadge`.
 
 ## [1.0.0-alpha.1] - 2026-06-06
 
