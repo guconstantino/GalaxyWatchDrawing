@@ -18,17 +18,20 @@ ao público geral. Necessário porque o app usa o escopo **sensível**
 
 Tudo no projeto **watchdraw-gus** em https://console.cloud.google.com/auth (Google Auth Platform).
 
-### A1. Tela de consentimento (Branding) — completar
+### A1. Tela de consentimento (Branding) — ✅ FEITO
 - **App name:** `WatchDraw`
 - **User support email:** `hello.gustavoconstantino@gmail.com`
-- **App logo:** PNG 120×120 (derivar do `docs/store-assets/icon-512.png`). O logo
-  passa por revisão de marca.
-- **App home page:** `https://github.com/guconstantino/GalaxyWatchDrawing`
+- **App logo:** `docs/store-assets/oauth-logo-120.png` (120×120, gerado do icon-512).
+- **App home page:** `https://guconstantino.github.io/GalaxyWatchDrawing/`
+  ⚠️ NÃO usar a URL do github.com — não dá para verificar o github.com como
+  domínio autorizado. Usar o github.io (que é nosso e verificado).
 - **Privacy policy:** `https://guconstantino.github.io/GalaxyWatchDrawing/privacy-policy.html`
-- **Authorized domains:** `github.io` (ver A2 sobre verificação de propriedade)
+- **Authorized domains:** `watchdraw-gus.firebaseapp.com` (auto, Firebase) +
+  **`guconstantino.github.io`** (NÃO `github.io` — é public suffix, rejeitado
+  como "domínio inválido").
 - **Developer contact email:** o mesmo
 
-### A2. Verificação de domínio (o principal obstáculo)
+### A2. Verificação de domínio — ✅ FEITO (via github.io)
 O Google exige que a conta dona do projeto **comprove posse** do domínio dos links
 acima, via **Google Search Console**.
 
@@ -109,9 +112,17 @@ com o comportamento real:
 
 ---
 
+## Progresso (jun/2026)
+- [x] A2 — domínio `guconstantino.github.io` verificado no Search Console (meta tag)
+- [x] A1 — Branding salvo (logo, links, authorized domains, contato)
+- [ ] A3 — justificativa do escopo (texto pronto acima; colar em Acesso a dados)
+- [ ] A4 — **gravar o vídeo** (YouTube Unlisted) ← próximo passo
+- [ ] A5 — mudar para Produção + submeter na Central de verificação
+- [ ] Parte B — Data Safety no Play Console (pode fazer a qualquer momento)
+
 ## Ordem sugerida
-1. Completar a consent screen (A1) + logo 120×120.
-2. **Verificação de domínio (A2)** — o gargalo; resolver primeiro.
+1. ~~Consent screen (A1) + logo~~ ✅
+2. ~~Verificação de domínio (A2)~~ ✅
 3. Justificativa (A3) + gravar o vídeo (A4).
-4. Submeter (A5) — e o relógio do Google corre em paralelo.
+4. Mudar para Produção e submeter (A5).
 5. Preencher o Data Safety (Parte B) no Play Console.
