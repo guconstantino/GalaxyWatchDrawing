@@ -94,6 +94,10 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
     var syncState by mutableStateOf<SyncState>(SyncState.Idle)
         private set
 
+    /** Ids of drawings already uploaded to Google Photos (for the cloud badge). */
+    var syncedIds by mutableStateOf<Set<String>>(emptySet())
+        private set
+
     private var syncing = false
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -103,8 +107,19 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
         cleanupTrash()
         userProfile = AuthManager.lastProfile(app)
         _syncQueue.addAll(SyncQueue.load(app))
+        syncedIds = SyncQueue.loadSyncedIds(app)
         // Retry any uploads that were left pending (e.g. offline last time).
         if (userProfile != null) processSyncQueue()
+    }
+
+    /** Cloud-sync status of a given drawing, for the gallery badge. */
+    fun syncStatusFor(drawingId: String): DrawingSyncStatus {
+        val queued = _syncQueue.firstOrNull { it.drawingId == drawingId }
+        return when {
+            queued != null -> if (queued.attempts > 0) DrawingSyncStatus.FAILED else DrawingSyncStatus.PENDING
+            drawingId in syncedIds -> DrawingSyncStatus.SYNCED
+            else -> DrawingSyncStatus.NONE
+        }
     }
 
     private fun cleanupTrash() {
@@ -383,6 +398,33 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
         currentScreen = AppScreen.Canvas
     }
 
+    /**
+     * Saves the current canvas drawing and returns its id (or null if empty),
+     * keeping [editingId] set so a later exit updates the same drawing instead of
+     * creating a duplicate. Used by the Download action on the canvas so the
+     * upload can be linked to a concrete drawing for the cloud badge.
+     */
+    fun commitCurrentDrawingForDownload(): String? {
+        if (_drawnPaths.isEmpty()) return null
+        val snapshot = _drawnPaths.toList()
+        val id = editingId
+        return if (id == null) {
+            if (_myDraws.size >= MAX_DRAWS) _myDraws.removeAt(_myDraws.lastIndex)
+            val created = Drawing(newId(), System.currentTimeMillis(), snapshot)
+            _myDraws.add(0, created)
+            editingId = created.id
+            galleryIndex = 0
+            persist(DRAWS_FILE, _myDraws)
+            created.id
+        } else {
+            val idx = _myDraws.indexOfFirst { it.id == id }
+            if (idx >= 0) _myDraws[idx] = _myDraws[idx].copy(paths = snapshot)
+            else _myDraws.add(0, Drawing(id, System.currentTimeMillis(), snapshot))
+            persist(DRAWS_FILE, _myDraws)
+            id
+        }
+    }
+
     private fun saveCurrentDrawing() {
         if (_drawnPaths.isEmpty()) {
             editingId = null
@@ -453,6 +495,7 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
         _myDraws.clear()
         _trash.clear()
         _syncQueue.clear()
+        syncedIds = emptySet()
         galleryIndex = 0
         editingId = null
         clearCanvas()
@@ -472,15 +515,17 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
      * Called by the Download action when the user is signed in. The PNG is
      * persisted immediately so it survives a restart if the upload fails.
      */
-    fun enqueueForSync(bitmap: Bitmap) {
+    fun enqueueForSync(bitmap: Bitmap, drawingId: String? = null) {
         syncScope.launch {
             val item = withContext(Dispatchers.IO) {
                 val bytes = ByteArrayOutputStream().use { out ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
                     out.toByteArray()
                 }
-                SyncQueue.enqueue(getApplication(), bytes)
+                SyncQueue.enqueue(getApplication(), bytes, drawingId)
             }
+            // A fresh upload supersedes any previous "synced" state for this drawing.
+            if (drawingId != null) syncedIds = syncedIds - drawingId
             _syncQueue.add(item)
             processSyncQueue()
         }
@@ -516,6 +561,7 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
                     is GooglePhotosUploader.Result.Success -> {
                         withContext(Dispatchers.IO) { SyncQueue.deleteFile(getApplication(), item) }
                         _syncQueue.removeAll { it.id == item.id }
+                        item.drawingId?.let { syncedIds = syncedIds + it }
                         uploaded++
                     }
                     is GooglePhotosUploader.Result.NotSignedIn,
@@ -531,7 +577,11 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 syncState = SyncState.Syncing(done = uploaded, total = total)
             }
-            withContext(Dispatchers.IO) { SyncQueue.saveIndex(getApplication(), _syncQueue) }
+            val ids = syncedIds
+            withContext(Dispatchers.IO) {
+                SyncQueue.saveIndex(getApplication(), _syncQueue)
+                SyncQueue.saveSyncedIds(getApplication(), ids)
+            }
             syncState = SyncState.Finished(uploaded = uploaded, failed = failed)
             syncing = false
         }
