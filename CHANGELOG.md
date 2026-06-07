@@ -8,6 +8,13 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
 
 ## [Unreleased]
 
+_Sem mudanças não lançadas._
+
+## [1.0.0-alpha.2] - 2026-06-07
+
+Segundo alpha — badge de sync por desenho, toolbar flutuante, e a base de
+qualidade (testes + CI).
+
 ### Added
 - **Badge de nuvem por desenho** nas galerias My draws e Favorites: mostra o
   status de sincronização com o Google Photos de cada desenho — **âmbar**
