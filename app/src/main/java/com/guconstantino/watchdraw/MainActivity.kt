@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.guconstantino.watchdraw.data.AuthManager
+import com.guconstantino.watchdraw.data.BillingManager
 import com.guconstantino.watchdraw.data.DrawingViewModel
 import com.guconstantino.watchdraw.data.UserProfile
 import com.guconstantino.watchdraw.presentation.WatchDrawApp
@@ -19,9 +20,18 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: DrawingViewModel by viewModels()
     private lateinit var signInLauncher: ActivityResultLauncher<Intent>
+    private lateinit var billing: BillingManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Play Billing: push the entitlement + price into the ViewModel for the UI.
+        billing = BillingManager(
+            context = this,
+            onProChanged = { viewModel.updatePro(it) },
+            onPriceChanged = { viewModel.updateProPrice(it) }
+        )
+        billing.connect()
 
         signInLauncher = registerForActivityResult(StartActivityForResult()) { result ->
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -43,9 +53,22 @@ class MainActivity : ComponentActivity() {
             WatchDrawTheme {
                 WatchDrawApp(
                     viewModel = viewModel,
-                    onGoogleSignIn = { signInLauncher.launch(AuthManager.client(this).signInIntent) }
+                    onGoogleSignIn = { signInLauncher.launch(AuthManager.client(this).signInIntent) },
+                    onBuyPro = { billing.launchPurchase(this) }
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Re-check entitlement when returning to the app (e.g. after a purchase
+        // completed elsewhere, or a refund).
+        if (::billing.isInitialized) billing.refreshPurchases()
+    }
+
+    override fun onDestroy() {
+        if (::billing.isInitialized) billing.release()
+        super.onDestroy()
     }
 }

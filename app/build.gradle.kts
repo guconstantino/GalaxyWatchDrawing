@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.wear.compose.navigation)
     implementation(libs.play.services.auth)
     implementation(libs.coil.compose)
+    implementation(libs.billing.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

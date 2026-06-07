@@ -52,14 +52,18 @@ import kotlin.math.roundToInt
  * active menu rendered as a centered modal overlay on top (matching the prototype).
  */
 @Composable
-fun WatchDrawApp(viewModel: DrawingViewModel, onGoogleSignIn: () -> Unit = {}) {
+fun WatchDrawApp(
+    viewModel: DrawingViewModel,
+    onGoogleSignIn: () -> Unit = {},
+    onBuyPro: () -> Unit = {}
+) {
     when (viewModel.currentScreen) {
         AppScreen.Home -> HomeScreen(viewModel)
         AppScreen.MyDraws -> MyDrawsScreen(viewModel)
         AppScreen.Favorites -> FavoritesScreen(viewModel)
         AppScreen.Trash -> TrashScreen(viewModel)
-        AppScreen.Settings -> SettingsScreen(viewModel, onGoogleSignIn)
-        AppScreen.Profile -> ProfileScreen(viewModel)
+        AppScreen.Settings -> SettingsScreen(viewModel, onGoogleSignIn, onBuyPro)
+        AppScreen.Profile -> ProfileScreen(viewModel, onBuyPro)
         AppScreen.ResetConfirm -> ResetConfirmScreen(viewModel)
         AppScreen.ResetSuccess -> ResetSuccessScreen(viewModel)
         else -> Box(modifier = Modifier.fillMaxSize()) {

@@ -54,7 +54,11 @@ private val OnDanger = Color(0xFF690005)
  * ------------------------------------------------------------------------- */
 
 @Composable
-fun SettingsScreen(viewModel: DrawingViewModel, onGoogleSignIn: () -> Unit) {
+fun SettingsScreen(
+    viewModel: DrawingViewModel,
+    onGoogleSignIn: () -> Unit,
+    onBuyPro: () -> Unit = {}
+) {
     BackHandler { viewModel.currentScreen = AppScreen.Home }
 
     Column(
@@ -67,6 +71,7 @@ fun SettingsScreen(viewModel: DrawingViewModel, onGoogleSignIn: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         GoogleSignInButton(onClick = onGoogleSignIn)
+        ProRow(isPro = viewModel.isPro, price = viewModel.proPriceText, onBuyPro = onBuyPro)
         SettingsPill(
             label = "Reset All",
             background = PrimaryContainer,
@@ -81,7 +86,7 @@ fun SettingsScreen(viewModel: DrawingViewModel, onGoogleSignIn: () -> Unit) {
  * ------------------------------------------------------------------------- */
 
 @Composable
-fun ProfileScreen(viewModel: DrawingViewModel) {
+fun ProfileScreen(viewModel: DrawingViewModel, onBuyPro: () -> Unit = {}) {
     BackHandler { viewModel.currentScreen = AppScreen.Home }
     val user = viewModel.userProfile
 
@@ -190,6 +195,7 @@ fun ProfileScreen(viewModel: DrawingViewModel) {
                 textAlign = TextAlign.Center
             )
         }
+        ProRow(isPro = viewModel.isPro, price = viewModel.proPriceText, onBuyPro = onBuyPro)
         SettingsPill(
             label = "Reset All",
             background = PrimaryContainer,
@@ -201,6 +207,31 @@ fun ProfileScreen(viewModel: DrawingViewModel) {
             background = PrimaryContainer,
             content = IconOnContainer,
             onClick = { viewModel.signOut() }
+        )
+    }
+}
+
+/* ------------------------------------------------------------------------- *
+ * WatchDraw Pro row — buy when not owned, badge when owned.
+ * ------------------------------------------------------------------------- */
+
+@Composable
+private fun ProRow(isPro: Boolean, price: String?, onBuyPro: () -> Unit) {
+    when {
+        isPro -> SettingsPill(
+            label = "WatchDraw Pro ✓",
+            background = PrimaryButton,
+            content = OnPrimary,
+            onClick = {}
+        )
+        // Only offer to buy when the product actually loaded from Play (price
+        // known). Until the Play Console product exists, show nothing — no dead
+        // button.
+        price != null -> SettingsPill(
+            label = "Unlock Pro · $price",
+            background = PrimaryButton,
+            content = OnPrimary,
+            onClick = onBuyPro
         )
     }
 }

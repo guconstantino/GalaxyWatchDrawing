@@ -97,6 +97,22 @@ class DrawingViewModel @JvmOverloads constructor(
         private set
 
     /* --------------------------------------------------------------------- *
+     * WatchDraw Pro (one-time purchase). The actual Play Billing lives in the
+     * Activity; here we just hold the entitlement + price for the UI to read.
+     * --------------------------------------------------------------------- */
+
+    /** True when the user owns the Pro unlock. */
+    var isPro by mutableStateOf(false)
+        private set
+
+    /** Formatted localized price of the Pro product (e.g. "R$ 14,90"), or null. */
+    var proPriceText by mutableStateOf<String?>(null)
+        private set
+
+    fun updatePro(value: Boolean) { isPro = value }
+    fun updateProPrice(price: String?) { proPriceText = price }
+
+    /* --------------------------------------------------------------------- *
      * Google Photos sync queue
      * --------------------------------------------------------------------- */
 
