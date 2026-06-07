@@ -41,6 +41,11 @@ class DrawingViewModel @JvmOverloads constructor(
     // Size of the on-screen drawing canvas in pixels; used to rasterize exports.
     var canvasSize by mutableStateOf(IntSize.Zero)
 
+    // Position (px) of the floating tool button on the canvas. Null = not placed
+    // yet (a default is computed once the canvas size is known). Kept in the
+    // ViewModel so the parked position survives opening/closing the tool pickers.
+    var fabOffset by mutableStateOf<Offset?>(null)
+
     // Heart toggle in the actions menu — purely visual for now (filled <-> outline).
     var favorite by mutableStateOf(false)
         private set
