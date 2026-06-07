@@ -20,6 +20,12 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
   (o Download no canvas agora salva o desenho em My draws para vincular o badge).
 - Ícones `IconCloudDone` / `IconCloudUpload` / `IconCloudOff` e o componente
   `CloudStatusBadge`.
+- **Infraestrutura de testes unitários**: JUnit4 + Robolectric + coroutines-test.
+  Primeira leva de testes (10) cobrindo persistência (`DrawingStore`,
+  `SyncQueue`), navegação da galeria, expiração do Trash e `syncStatusFor`.
+  Rodar com `./gradlew :app:testDebugUnitTest`.
+- **CI (GitHub Actions)**: workflow `tests` roda os testes unitários em todo
+  push na `main` e em pull requests.
 
 ## [1.0.0-alpha.1] - 2026-06-06
 
