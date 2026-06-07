@@ -8,6 +8,12 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
 
 ## [Unreleased]
 
+_Sem mudanças não lançadas._
+
+## [1.0.0-alpha.3] - 2026-06-07
+
+Terceiro alpha — foco em **precisão do desenho**.
+
 ### Changed
 - **Precisão do desenho** bastante melhorada:
   - **Catmull-Rom** no lugar da suavização por pontos médios — a linha agora
