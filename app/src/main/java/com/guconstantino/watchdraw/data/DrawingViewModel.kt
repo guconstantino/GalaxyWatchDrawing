@@ -1,6 +1,7 @@
 package com.guconstantino.watchdraw.data
 
 import android.app.Application
+import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +10,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.AndroidViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 
 class DrawingViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -73,11 +81,30 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
     var userProfile by mutableStateOf<UserProfile?>(null)
         private set
 
+    /* --------------------------------------------------------------------- *
+     * Google Photos sync queue
+     * --------------------------------------------------------------------- */
+
+    private val _syncQueue = mutableStateListOf<SyncQueue.Item>()
+
+    /** How many downloaded drawings are still waiting to reach Google Photos. */
+    val syncPendingCount: Int get() = _syncQueue.size
+
+    /** Current sync activity, observed by the Profile screen. */
+    var syncState by mutableStateOf<SyncState>(SyncState.Idle)
+        private set
+
+    private var syncing = false
+    private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
     init {
         _myDraws.addAll(DrawingStore.load(app, DRAWS_FILE))
         _trash.addAll(DrawingStore.load(app, TRASH_FILE))
         cleanupTrash()
         userProfile = AuthManager.lastProfile(app)
+        _syncQueue.addAll(SyncQueue.load(app))
+        // Retry any uploads that were left pending (e.g. offline last time).
+        if (userProfile != null) processSyncQueue()
     }
 
     private fun cleanupTrash() {
@@ -400,6 +427,8 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
     fun onSignedIn(profile: UserProfile) {
         userProfile = profile
         currentScreen = AppScreen.Profile
+        // Flush anything queued while logged out.
+        processSyncQueue()
     }
 
     /** Signs out and returns to the (logged-out) Settings screen. */
@@ -419,16 +448,98 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
         currentScreen = if (userProfile != null) AppScreen.Profile else AppScreen.Settings
     }
 
-    /** Permanently deletes every drawing (My draws, Favorites and Trash). */
+    /** Permanently deletes every drawing (My draws, Favorites, Trash and sync queue). */
     fun resetAllData() {
         _myDraws.clear()
         _trash.clear()
+        _syncQueue.clear()
         galleryIndex = 0
         editingId = null
         clearCanvas()
         persist(DRAWS_FILE, _myDraws)
         persist(TRASH_FILE, _trash)
+        SyncQueue.clear(getApplication())
+        syncState = SyncState.Idle
         currentScreen = AppScreen.ResetSuccess
+    }
+
+    /* --------------------------------------------------------------------- *
+     * Google Photos sync
+     * --------------------------------------------------------------------- */
+
+    /**
+     * Queues [bitmap] for upload to Google Photos and kicks off processing.
+     * Called by the Download action when the user is signed in. The PNG is
+     * persisted immediately so it survives a restart if the upload fails.
+     */
+    fun enqueueForSync(bitmap: Bitmap) {
+        syncScope.launch {
+            val item = withContext(Dispatchers.IO) {
+                val bytes = ByteArrayOutputStream().use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                    out.toByteArray()
+                }
+                SyncQueue.enqueue(getApplication(), bytes)
+            }
+            _syncQueue.add(item)
+            processSyncQueue()
+        }
+    }
+
+    /** Manual "Sync Now": force-process whatever is in the queue. */
+    fun syncNow() {
+        if (_syncQueue.isEmpty()) {
+            syncState = SyncState.Finished(uploaded = 0, failed = 0)
+            return
+        }
+        processSyncQueue()
+    }
+
+    /** Uploads every queued item, removing the ones that succeed. */
+    private fun processSyncQueue() {
+        if (syncing || userProfile == null || _syncQueue.isEmpty()) return
+        syncing = true
+        syncScope.launch {
+            val snapshot = _syncQueue.toList()
+            val total = snapshot.size
+            var uploaded = 0
+            var failed = 0
+            syncState = SyncState.Syncing(done = 0, total = total)
+            for (item in snapshot) {
+                val bytes = withContext(Dispatchers.IO) { SyncQueue.readBytes(getApplication(), item) }
+                val result = if (bytes == null) {
+                    GooglePhotosUploader.Result.Failed("missing file")
+                } else {
+                    GooglePhotosUploader.upload(getApplication(), bytes)
+                }
+                when (result) {
+                    is GooglePhotosUploader.Result.Success -> {
+                        withContext(Dispatchers.IO) { SyncQueue.deleteFile(getApplication(), item) }
+                        _syncQueue.removeAll { it.id == item.id }
+                        uploaded++
+                    }
+                    is GooglePhotosUploader.Result.NotSignedIn,
+                    is GooglePhotosUploader.Result.NeedsConsent -> {
+                        // Auth problem affects every item — stop and leave the rest queued.
+                        failed++
+                        break
+                    }
+                    is GooglePhotosUploader.Result.Failed -> {
+                        item.attempts++
+                        failed++
+                    }
+                }
+                syncState = SyncState.Syncing(done = uploaded, total = total)
+            }
+            withContext(Dispatchers.IO) { SyncQueue.saveIndex(getApplication(), _syncQueue) }
+            syncState = SyncState.Finished(uploaded = uploaded, failed = failed)
+            syncing = false
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        syncScope.cancel()
     }
 
     companion object {
