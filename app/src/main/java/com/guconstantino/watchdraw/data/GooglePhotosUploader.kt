@@ -25,43 +25,36 @@ import java.net.URL
  *
  * Everything runs on [Dispatchers.IO]; callers should launch from a coroutine.
  */
-object GooglePhotosUploader {
+object GooglePhotosUploader : PhotoUploader {
 
     private const val UPLOAD_URL = "https://photoslibrary.googleapis.com/v1/uploads"
     private const val BATCH_CREATE_URL =
         "https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate"
     private const val ALBUM_DESCRIPTION = "WatchDraw"
 
-    sealed class Result {
-        object Success : Result()
-        object NotSignedIn : Result()
-        /** Sign-in succeeded but the Photos scope is missing — needs re-consent. */
-        object NeedsConsent : Result()
-        data class Failed(val reason: String) : Result()
-    }
+    override suspend fun upload(context: Context, pngBytes: ByteArray): UploadResult =
+        withContext(Dispatchers.IO) {
+            val account = AuthManager.account(context) ?: return@withContext UploadResult.NotSignedIn
+            if (!AuthManager.hasPhotosScope(context)) return@withContext UploadResult.NeedsConsent
+            val androidAccount = account.account ?: return@withContext UploadResult.NotSignedIn
 
-    suspend fun upload(context: Context, pngBytes: ByteArray): Result = withContext(Dispatchers.IO) {
-        val account = AuthManager.account(context) ?: return@withContext Result.NotSignedIn
-        if (!AuthManager.hasPhotosScope(context)) return@withContext Result.NeedsConsent
-        val androidAccount = account.account ?: return@withContext Result.NotSignedIn
+            try {
+                val token = GoogleAuthUtil.getToken(
+                    context,
+                    androidAccount,
+                    "oauth2:${AuthManager.PHOTOS_APPEND_SCOPE}"
+                )
 
-        try {
-            val token = GoogleAuthUtil.getToken(
-                context,
-                androidAccount,
-                "oauth2:${AuthManager.PHOTOS_APPEND_SCOPE}"
-            )
+                val uploadToken = postBytes(token, pngBytes)
+                    ?: return@withContext UploadResult.Failed("upload failed")
 
-            val uploadToken = postBytes(token, pngBytes)
-                ?: return@withContext Result.Failed("upload failed")
-
-            val created = batchCreate(token, uploadToken)
-            if (created) Result.Success else Result.Failed("media item creation failed")
-        } catch (e: Exception) {
-            // UserRecoverableAuthException (consent revoked/needed) lands here too.
-            Result.Failed(e.message ?: "unknown error")
+                val created = batchCreate(token, uploadToken)
+                if (created) UploadResult.Success else UploadResult.Failed("media item creation failed")
+            } catch (e: Exception) {
+                // UserRecoverableAuthException (consent revoked/needed) lands here too.
+                UploadResult.Failed(e.message ?: "unknown error")
+            }
         }
-    }
 
     /** Step 1 — upload raw bytes, return the upload token (response body), or null. */
     private fun postBytes(accessToken: String, bytes: ByteArray): String? {
