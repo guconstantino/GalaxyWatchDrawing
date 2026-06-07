@@ -26,6 +26,12 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
   Rodar com `./gradlew :app:testDebugUnitTest`.
 - **CI (GitHub Actions)**: workflow `tests` roda os testes unitários em todo
   push na `main` e em pull requests.
+- **Seam de teste do uploader**: interface `PhotoUploader` + `UploadResult`
+  (top-level); `GooglePhotosUploader` agora a implementa. `DrawingViewModel`
+  recebe o uploader e o `ioDispatcher` por injeção (`@JvmOverloads`, defaults de
+  produção). Permite testar o processamento da fila de sync com um fake, sem
+  rede/auth/device. +3 testes (sucesso limpa a fila e marca synced; falha mantém
+  e marca failed; needs-consent para o lote).
 
 ## [1.0.0-alpha.1] - 2026-06-06
 
