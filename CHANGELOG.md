@@ -33,6 +33,15 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
   rede/auth/device. +3 testes (sucesso limpa a fila e marca synced; falha mantém
   e marca failed; needs-consent para o lote).
 
+### Changed
+- **Toolbar do canvas** virou um **botão flutuante único e arrastável**: por
+  padrão fica recolhido (um círculo com a cor atual), pode ser posicionado em
+  qualquer lugar da tela e mantém a posição. **Tap** expande no arco de 3 botões
+  (espessura · cor · ações); **tap fora** recolhe. Libera a tela pequena e tira o
+  toolbar de cima do desenho. Arraste fluido (delta por evento, posição lida na
+  fase de layout). Ícone de espessura agora é uma **linha horizontal** (reflete o
+  pincel atual). Posição em `DrawingViewModel.fabOffset`.
+
 ## [1.0.0-alpha.1] - 2026-06-06
 
 Primeiro lançamento público (**alpha**) — app de desenho Wear OS completo, com
