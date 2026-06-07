@@ -54,9 +54,14 @@ class DrawingViewModel @JvmOverloads constructor(
         favorite = !favorite
     }
 
-    // Live drawing path (updates every touch move)
-    var currentPoints by mutableStateOf<List<Offset>>(emptyList())
-        private set
+    // Live drawing path (updates every touch sample). A SnapshotStateList gives
+    // O(1) appends — the old `list + point` was O(n) per sample, O(n²) per stroke,
+    // which added lag (and perceived imprecision) on long strokes.
+    private val _currentPoints = mutableStateListOf<Offset>()
+    val currentPoints: List<Offset> get() = _currentPoints
+
+    // 1€ filter applied to raw input to remove jitter without cutting precision.
+    private val strokeFilter = OneEuroFilter()
 
     /* --------------------------------------------------------------------- *
      * Saved drawings (My draws) + Favorites + Trash
@@ -149,30 +154,37 @@ class DrawingViewModel @JvmOverloads constructor(
      * Drawing interactions
      * --------------------------------------------------------------------- */
 
-    fun startStroke(offset: Offset) {
-        currentPoints = listOf(offset)
+    fun startStroke(offset: Offset, timeMillis: Long) {
+        strokeFilter.reset()
+        _currentPoints.clear()
+        _currentPoints.add(strokeFilter.filter(offset, timeMillis))
     }
 
-    fun addPoint(offset: Offset) {
-        currentPoints = currentPoints + offset
+    /** Adds a (raw) input sample; it is jitter-filtered and de-duplicated. */
+    fun addPoint(offset: Offset, timeMillis: Long) {
+        val filtered = strokeFilter.filter(offset, timeMillis)
+        val last = _currentPoints.lastOrNull()
+        if (last == null || (filtered - last).getDistance() >= MIN_POINT_DISTANCE) {
+            _currentPoints.add(filtered)
+        }
     }
 
     fun endStroke() {
-        if (currentPoints.size > 1) {
+        if (_currentPoints.size > 1) {
             _drawnPaths.add(
                 DrawnPath(
-                    points = currentPoints,
+                    points = _currentPoints.toList(),
                     color = currentColor,
                     strokeWidth = currentStrokeWidth
                 )
             )
             _undonePaths.clear()
         }
-        currentPoints = emptyList()
+        _currentPoints.clear()
     }
 
     fun cancelStroke() {
-        currentPoints = emptyList()
+        _currentPoints.clear()
     }
 
     fun undo() {
@@ -192,7 +204,7 @@ class DrawingViewModel @JvmOverloads constructor(
     fun clearCanvas() {
         _drawnPaths.clear()
         _undonePaths.clear()
-        currentPoints = emptyList()
+        _currentPoints.clear()
     }
 
     fun setColor(color: Color) {
@@ -251,7 +263,7 @@ class DrawingViewModel @JvmOverloads constructor(
         _drawnPaths.clear()
         _drawnPaths.addAll(d.paths)
         _undonePaths.clear()
-        currentPoints = emptyList()
+        _currentPoints.clear()
         currentScreen = AppScreen.Canvas
     }
 
@@ -333,7 +345,7 @@ class DrawingViewModel @JvmOverloads constructor(
         _drawnPaths.clear()
         _drawnPaths.addAll(d.paths)
         _undonePaths.clear()
-        currentPoints = emptyList()
+        _currentPoints.clear()
         currentScreen = AppScreen.Canvas
     }
 
@@ -404,7 +416,7 @@ class DrawingViewModel @JvmOverloads constructor(
         _drawnPaths.clear()
         _drawnPaths.addAll(d.paths)
         _undonePaths.clear()
-        currentPoints = emptyList()
+        _currentPoints.clear()
         currentScreen = AppScreen.Canvas
     }
 
@@ -606,5 +618,7 @@ class DrawingViewModel @JvmOverloads constructor(
         private const val DRAWS_FILE = "my_draws.json"
         private const val TRASH_FILE = "trash.json"
         private const val MAX_DRAWS = 100
+        // Drop filtered samples closer than this (px) to keep point count sane.
+        private const val MIN_POINT_DISTANCE = 0.75f
     }
 }
