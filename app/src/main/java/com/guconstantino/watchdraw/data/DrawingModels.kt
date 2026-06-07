@@ -37,3 +37,10 @@ enum class AppScreen {
     Settings, Profile, ResetConfirm, ResetSuccess,
     Canvas, StrokePicker, ColorPicker, Actions, ClearConfirm, DeleteConfirm
 }
+
+/** State of the Google Photos sync queue, surfaced on the Profile screen. */
+sealed class SyncState {
+    object Idle : SyncState()
+    data class Syncing(val done: Int, val total: Int) : SyncState()
+    data class Finished(val uploaded: Int, val failed: Int) : SyncState()
+}
