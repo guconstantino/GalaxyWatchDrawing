@@ -1,6 +1,5 @@
 package com.guconstantino.watchdraw.presentation
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,6 +33,7 @@ import androidx.wear.compose.material3.Text
 import coil.compose.AsyncImage
 import com.guconstantino.watchdraw.data.AppScreen
 import com.guconstantino.watchdraw.data.DrawingViewModel
+import com.guconstantino.watchdraw.data.SyncState
 
 // Danger (Reset / Delete All) colors, per the Figma "Caution" prototype.
 private val DangerContainer = Color(0xFFFFB4AB)
@@ -73,7 +73,6 @@ fun SettingsScreen(viewModel: DrawingViewModel, onGoogleSignIn: () -> Unit) {
 @Composable
 fun ProfileScreen(viewModel: DrawingViewModel) {
     BackHandler { viewModel.currentScreen = AppScreen.Home }
-    val context = LocalContext.current
     val user = viewModel.userProfile
 
     Column(
@@ -129,12 +128,30 @@ fun ProfileScreen(viewModel: DrawingViewModel) {
             modifier = Modifier.padding(bottom = 4.dp)
         )
 
+        val pending = viewModel.syncPendingCount
         SettingsPill(
-            label = "Sync Now",
+            label = if (pending > 0) "Sync Now ($pending)" else "Sync Now",
             background = PrimaryButton,
             content = OnPrimary,
-            onClick = { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }
+            onClick = { viewModel.syncNow() }
         )
+        val syncStatus: String? = when (val s = viewModel.syncState) {
+            is SyncState.Syncing -> "Syncing… ${s.done}/${s.total}"
+            is SyncState.Finished -> when {
+                s.failed > 0 -> "${s.uploaded} synced · ${s.failed} failed"
+                s.uploaded > 0 -> "All synced ✓"
+                else -> if (pending > 0) "$pending pending" else null
+            }
+            SyncState.Idle -> if (pending > 0) "$pending pending" else null
+        }
+        syncStatus?.let {
+            Text(
+                text = it,
+                color = IconOnSurface,
+                fontSize = 10.sp,
+                textAlign = TextAlign.Center
+            )
+        }
         SettingsPill(
             label = "Reset All",
             background = PrimaryContainer,

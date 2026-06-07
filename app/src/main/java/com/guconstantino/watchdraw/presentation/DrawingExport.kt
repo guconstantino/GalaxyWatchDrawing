@@ -16,9 +16,6 @@ import androidx.core.content.FileProvider
 import com.guconstantino.watchdraw.data.AuthManager
 import com.guconstantino.watchdraw.data.DrawingViewModel
 import com.guconstantino.watchdraw.data.DrawnPath
-import com.guconstantino.watchdraw.data.GooglePhotosUploader
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
@@ -104,32 +101,29 @@ fun shareDrawing(context: Context, bitmap: Bitmap) {
 
 /**
  * Handles the Download action everywhere: always saves [bitmap] to the local
- * gallery, and when the user is signed in also uploads it to their Google Photos
- * (so it shows up in the Photos app on their phone). Each step toasts its result.
- *
- * [scope] drives the network upload — pass a composable's rememberCoroutineScope().
- * Returns immediately; the gallery save is synchronous, the Photos upload async.
+ * gallery, and when the user is signed in also queues it for upload to their
+ * Google Photos. The queue ([DrawingViewModel.enqueueForSync]) persists the image
+ * and retries later if the watch is offline, so this returns immediately.
  */
-fun downloadDrawing(context: Context, scope: CoroutineScope, bitmap: Bitmap) {
+fun downloadDrawing(context: Context, viewModel: DrawingViewModel, bitmap: Bitmap) {
     val savedLocally = saveDrawingToGallery(context, bitmap)
-    Toast.makeText(
-        context,
-        if (savedLocally) "Saved to gallery" else "Save failed",
-        Toast.LENGTH_SHORT
-    ).show()
 
     // Logged-out users keep the local-only behavior; nothing leaves the device.
-    if (AuthManager.account(context) == null) return
-
-    scope.launch {
-        val message = when (GooglePhotosUploader.upload(context, bitmap)) {
-            is GooglePhotosUploader.Result.Success -> "Sent to Google Photos"
-            is GooglePhotosUploader.Result.NeedsConsent -> "Sign in again to enable Photos sync"
-            is GooglePhotosUploader.Result.Failed -> "Photos sync failed"
-            is GooglePhotosUploader.Result.NotSignedIn -> null
-        }
-        message?.let { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+    if (AuthManager.account(context) == null) {
+        Toast.makeText(
+            context,
+            if (savedLocally) "Saved to gallery" else "Save failed",
+            Toast.LENGTH_SHORT
+        ).show()
+        return
     }
+
+    viewModel.enqueueForSync(bitmap)
+    Toast.makeText(
+        context,
+        if (savedLocally) "Saved · syncing to Photos…" else "Save failed",
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 /** Saves [bitmap] to the device gallery (Pictures/WatchDraw) via MediaStore. */
