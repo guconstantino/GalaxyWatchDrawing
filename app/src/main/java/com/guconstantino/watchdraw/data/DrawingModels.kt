@@ -44,3 +44,6 @@ sealed class SyncState {
     data class Syncing(val done: Int, val total: Int) : SyncState()
     data class Finished(val uploaded: Int, val failed: Int) : SyncState()
 }
+
+/** Per-drawing Google Photos sync status, shown as a cloud badge in the galleries. */
+enum class DrawingSyncStatus { NONE, PENDING, FAILED, SYNCED }

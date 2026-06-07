@@ -228,7 +228,8 @@ fun ActionsMenu(viewModel: DrawingViewModel) {
                     // Download -> save locally + (if signed in) sync to Google Photos
                     SurfaceIconButton(onClick = {
                         val bmp = renderDrawingBitmap(viewModel, viewModel.canvasSize)
-                        downloadDrawing(context, viewModel, bmp)
+                        val id = viewModel.commitCurrentDrawingForDownload()
+                        downloadDrawing(context, viewModel, bmp, id)
                         viewModel.currentScreen = AppScreen.Canvas
                     }) { IconDownload(Modifier.size(24.dp)) }
                 }

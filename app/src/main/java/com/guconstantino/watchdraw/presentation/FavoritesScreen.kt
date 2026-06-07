@@ -159,6 +159,14 @@ fun FavoritesScreen(viewModel: DrawingViewModel) {
                 }
             }
 
+            // Per-drawing Google Photos sync status (cloud badge), top-center.
+            CloudStatusBadge(
+                status = viewModel.syncStatusFor(drawing.id),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 18.dp)
+            )
+
             // Controls — same Figma positions as MyDrawsScreen (node 144969:301).
             FavArcIconButton(
                 modifier = Modifier
@@ -177,7 +185,7 @@ fun FavoritesScreen(viewModel: DrawingViewModel) {
                     .offset(x = (-24).dp, y = 0.dp),
                 onClick = {
                     val bmp = renderPathsBitmap(drawing.paths, viewModel.canvasSize)
-                    downloadDrawing(context, viewModel, bmp)
+                    downloadDrawing(context, viewModel, bmp, drawing.id)
                 }
             ) { IconDownload(Modifier.size(24.dp)) }
 

@@ -20,19 +20,22 @@ object SyncQueue {
         val id: String,
         val fileName: String,
         val createdAt: Long,
-        var attempts: Int = 0
+        var attempts: Int = 0,
+        /** Id of the [Drawing] this upload belongs to, for the per-drawing badge. */
+        val drawingId: String? = null
     )
 
     private const val DIR = "sync_queue"
     private const val INDEX = "sync_queue_index.json"
+    private const val SYNCED = "synced_ids.json"
 
     private fun dir(context: Context): File =
         File(context.filesDir, DIR).apply { mkdirs() }
 
     /** Writes [pngBytes] to disk and appends an entry to the index. */
-    fun enqueue(context: Context, pngBytes: ByteArray): Item {
+    fun enqueue(context: Context, pngBytes: ByteArray, drawingId: String? = null): Item {
         val id = System.currentTimeMillis().toString() + "_" + (0..9_999).random()
-        val item = Item(id, "$id.png", System.currentTimeMillis())
+        val item = Item(id, "$id.png", System.currentTimeMillis(), drawingId = drawingId)
         File(dir(context), item.fileName).writeBytes(pngBytes)
         val items = load(context)
         items.add(item)
@@ -53,7 +56,8 @@ object SyncQueue {
                         id = o.getString("id"),
                         fileName = o.getString("fileName"),
                         createdAt = o.getLong("createdAt"),
-                        attempts = o.optInt("attempts", 0)
+                        attempts = o.optInt("attempts", 0),
+                        drawingId = o.optString("drawingId", "").ifEmpty { null }
                     )
                 )
             }
@@ -71,6 +75,7 @@ object SyncQueue {
                 put("fileName", it.fileName)
                 put("createdAt", it.createdAt)
                 put("attempts", it.attempts)
+                if (it.drawingId != null) put("drawingId", it.drawingId)
             })
         }
         try {
@@ -97,7 +102,32 @@ object SyncQueue {
         }
     }
 
-    /** Wipes the whole queue (files + index) — used by Reset All. */
+    /* ----- Ids of drawings already uploaded to Google Photos (for the badge) ----- */
+
+    fun loadSyncedIds(context: Context): MutableSet<String> {
+        val file = File(context.filesDir, SYNCED)
+        if (!file.exists()) return mutableSetOf()
+        return try {
+            val arr = JSONObject(file.readText()).optJSONArray("ids") ?: JSONArray()
+            val out = HashSet<String>(arr.length())
+            for (i in 0 until arr.length()) out.add(arr.getString(i))
+            out
+        } catch (e: Exception) {
+            mutableSetOf()
+        }
+    }
+
+    fun saveSyncedIds(context: Context, ids: Set<String>) {
+        val arr = JSONArray()
+        for (id in ids) arr.put(id)
+        try {
+            File(context.filesDir, SYNCED).writeText(JSONObject().put("ids", arr).toString())
+        } catch (e: Exception) {
+            // best-effort persistence
+        }
+    }
+
+    /** Wipes the whole queue (files + index + synced ids) — used by Reset All. */
     fun clear(context: Context) {
         try {
             dir(context).deleteRecursively()
@@ -106,6 +136,11 @@ object SyncQueue {
         }
         try {
             File(context.filesDir, INDEX).delete()
+        } catch (e: Exception) {
+            // ignore
+        }
+        try {
+            File(context.filesDir, SYNCED).delete()
         } catch (e: Exception) {
             // ignore
         }

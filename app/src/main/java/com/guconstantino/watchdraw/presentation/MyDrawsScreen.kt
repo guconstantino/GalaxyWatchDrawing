@@ -161,6 +161,14 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                 }
             }
 
+            // Per-drawing Google Photos sync status (cloud badge), top-center.
+            CloudStatusBadge(
+                status = viewModel.syncStatusFor(drawing.id),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 18.dp)
+            )
+
             // Controls — positions from Figma node 144969:301 (192dp canvas, 1:1).
             // Outer buttons at (±60, -48), inner buttons at (±24, 0) from BottomCenter.
             ArcIconButton(
@@ -180,7 +188,7 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                     .offset(x = (-24).dp, y = 0.dp),
                 onClick = {
                     val bmp = renderPathsBitmap(drawing.paths, viewModel.canvasSize)
-                    downloadDrawing(context, viewModel, bmp)
+                    downloadDrawing(context, viewModel, bmp, drawing.id)
                 }
             ) { IconDownload(Modifier.size(24.dp)) }
 

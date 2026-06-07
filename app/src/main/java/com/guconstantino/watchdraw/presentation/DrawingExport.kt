@@ -105,7 +105,12 @@ fun shareDrawing(context: Context, bitmap: Bitmap) {
  * Google Photos. The queue ([DrawingViewModel.enqueueForSync]) persists the image
  * and retries later if the watch is offline, so this returns immediately.
  */
-fun downloadDrawing(context: Context, viewModel: DrawingViewModel, bitmap: Bitmap) {
+fun downloadDrawing(
+    context: Context,
+    viewModel: DrawingViewModel,
+    bitmap: Bitmap,
+    drawingId: String? = null
+) {
     val savedLocally = saveDrawingToGallery(context, bitmap)
 
     // Logged-out users keep the local-only behavior; nothing leaves the device.
@@ -118,7 +123,7 @@ fun downloadDrawing(context: Context, viewModel: DrawingViewModel, bitmap: Bitma
         return
     }
 
-    viewModel.enqueueForSync(bitmap)
+    viewModel.enqueueForSync(bitmap, drawingId)
     Toast.makeText(
         context,
         if (savedLocally) "Saved · syncing to Photos…" else "Save failed",
