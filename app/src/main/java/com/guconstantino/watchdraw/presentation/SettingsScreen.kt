@@ -1,13 +1,19 @@
 package com.guconstantino.watchdraw.presentation
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -18,11 +24,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +43,7 @@ import androidx.wear.compose.material3.Text
 import coil.compose.AsyncImage
 import com.guconstantino.watchdraw.data.AppScreen
 import com.guconstantino.watchdraw.data.DrawingViewModel
+import com.guconstantino.watchdraw.data.SyncState
 
 // Danger (Reset / Delete All) colors, per the Figma "Caution" prototype.
 private val DangerContainer = Color(0xFFFFB4AB)
@@ -73,7 +83,6 @@ fun SettingsScreen(viewModel: DrawingViewModel, onGoogleSignIn: () -> Unit) {
 @Composable
 fun ProfileScreen(viewModel: DrawingViewModel) {
     BackHandler { viewModel.currentScreen = AppScreen.Home }
-    val context = LocalContext.current
     val user = viewModel.userProfile
 
     Column(
@@ -129,12 +138,58 @@ fun ProfileScreen(viewModel: DrawingViewModel) {
             modifier = Modifier.padding(bottom = 4.dp)
         )
 
-        SettingsPill(
-            label = "Sync Now",
-            background = PrimaryButton,
-            content = OnPrimary,
-            onClick = { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }
-        )
+        val pending = viewModel.syncPendingCount
+        val syncState = viewModel.syncState
+        if (syncState is SyncState.Syncing) {
+            // While uploading, the pill itself becomes the progress indicator.
+            Box(
+                modifier = Modifier
+                    .width(150.dp)
+                    .heightIn(min = 44.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(PrimaryButton)
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    MiniSpinner(color = OnPrimary)
+                    Text(
+                        text = "Syncing ${syncState.done}/${syncState.total}",
+                        color = OnPrimary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        } else {
+            SettingsPill(
+                label = if (pending > 0) "Sync Now ($pending)" else "Sync Now",
+                background = PrimaryButton,
+                content = OnPrimary,
+                enabled = pending > 0,
+                onClick = { viewModel.syncNow() }
+            )
+        }
+        val syncStatus: String? = when (syncState) {
+            is SyncState.Syncing -> null // the pill already shows progress
+            is SyncState.Finished -> when {
+                syncState.failed > 0 -> "${syncState.uploaded} synced · ${syncState.failed} failed"
+                syncState.uploaded > 0 -> "All synced ✓"
+                else -> if (pending > 0) "$pending pending" else null
+            }
+            SyncState.Idle -> if (pending > 0) "$pending pending" else null
+        }
+        syncStatus?.let {
+            Text(
+                text = it,
+                color = IconOnSurface,
+                fontSize = 10.sp,
+                textAlign = TextAlign.Center
+            )
+        }
         SettingsPill(
             label = "Reset All",
             background = PrimaryContainer,
@@ -233,11 +288,37 @@ fun ResetSuccessScreen(viewModel: DrawingViewModel) {
 
 /* ------------------------------------------------------------------------- */
 
+/** A small, subtle indeterminate spinner (rotating arc) used during sync. */
+@Composable
+private fun MiniSpinner(color: Color, modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "sync-spinner")
+    val angle by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 800, easing = LinearEasing)),
+        label = "sync-spinner-angle"
+    )
+    Canvas(modifier = modifier.size(14.dp)) {
+        val stroke = 2.dp.toPx()
+        val inset = stroke / 2f
+        drawArc(
+            color = color,
+            startAngle = angle,
+            sweepAngle = 270f,
+            useCenter = false,
+            topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
+            size = androidx.compose.ui.geometry.Size(size.width - stroke, size.height - stroke),
+            style = Stroke(width = stroke, cap = StrokeCap.Round)
+        )
+    }
+}
+
 @Composable
 private fun SettingsPill(
     label: String,
     background: Color,
     content: Color,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Box(
@@ -245,14 +326,14 @@ private fun SettingsPill(
             .width(150.dp)
             .heightIn(min = 44.dp)
             .clip(RoundedCornerShape(22.dp))
-            .background(background)
-            .clickable(onClick = onClick)
+            .background(if (enabled) background else background.copy(alpha = 0.4f))
+            .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 14.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
-            color = content,
+            color = if (enabled) content else content.copy(alpha = 0.5f),
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium
         )

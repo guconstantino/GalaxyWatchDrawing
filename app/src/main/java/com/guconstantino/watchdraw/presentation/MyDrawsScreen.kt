@@ -20,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,7 +59,6 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
 
     val drawing = viewModel.currentGalleryDrawing
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var showDeletedMsg by remember { mutableStateOf(false) }
 
     Box(
@@ -182,7 +180,7 @@ fun MyDrawsScreen(viewModel: DrawingViewModel) {
                     .offset(x = (-24).dp, y = 0.dp),
                 onClick = {
                     val bmp = renderPathsBitmap(drawing.paths, viewModel.canvasSize)
-                    downloadDrawing(context, scope, bmp)
+                    downloadDrawing(context, viewModel, bmp)
                 }
             ) { IconDownload(Modifier.size(24.dp)) }
 

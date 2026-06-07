@@ -1,13 +1,11 @@
 package com.guconstantino.watchdraw.data
 
 import android.content.Context
-import android.graphics.Bitmap
 import com.google.android.gms.auth.GoogleAuthUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -42,7 +40,7 @@ object GooglePhotosUploader {
         data class Failed(val reason: String) : Result()
     }
 
-    suspend fun upload(context: Context, bitmap: Bitmap): Result = withContext(Dispatchers.IO) {
+    suspend fun upload(context: Context, pngBytes: ByteArray): Result = withContext(Dispatchers.IO) {
         val account = AuthManager.account(context) ?: return@withContext Result.NotSignedIn
         if (!AuthManager.hasPhotosScope(context)) return@withContext Result.NeedsConsent
         val androidAccount = account.account ?: return@withContext Result.NotSignedIn
@@ -53,11 +51,6 @@ object GooglePhotosUploader {
                 androidAccount,
                 "oauth2:${AuthManager.PHOTOS_APPEND_SCOPE}"
             )
-
-            val pngBytes = ByteArrayOutputStream().use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                out.toByteArray()
-            }
 
             val uploadToken = postBytes(token, pngBytes)
                 ?: return@withContext Result.Failed("upload failed")
