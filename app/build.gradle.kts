@@ -61,6 +61,11 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -73,4 +78,9 @@ dependencies {
     implementation(libs.wear.compose.navigation)
     implementation(libs.play.services.auth)
     implementation(libs.coil.compose)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

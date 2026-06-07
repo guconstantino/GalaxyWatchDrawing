@@ -57,6 +57,21 @@ Commits seguem prefixos semânticos: `feat:`, `fix:`, `docs:`, `chore:`,
    - Opcional: anexar o APK de release como asset para sideload/teste.
 6. Atualizar o **relatório do Notion** (ver `CLAUDE.md`).
 
+## Testes
+
+Estratégia: **núcleo funcional testável** — a maior parte da lógica é coberta por
+testes JVM rápidos; UI/visual fica para o teste manual no relógio.
+
+- **Rodar:** `./gradlew :app:testDebugUnitTest` (relatório em
+  `app/build/reports/tests/`).
+- **Onde ficam:** `app/src/test/java/...` (JUnit4 + Robolectric para o `Context`).
+- **O que testar (prioridade):** lógica de sync (fila, `syncStatusFor`),
+  navegação da galeria, expiração do Trash, round-trip de persistência.
+- **O que NÃO testar:** UI Compose, SDK do Google, rasterização de `Bitmap`.
+- **CI:** o workflow `tests` (GitHub Actions) roda os unit tests em todo push na
+  `main` e PRs. **CI verde é pré-requisito do merge.**
+- Mudanças em lógica de sync/galeria/persistência **acompanham um teste**.
+
 ## Build & assinatura
 
 - Terminal sem Java: usar o JDK do Android Studio →
