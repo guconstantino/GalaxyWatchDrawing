@@ -68,12 +68,14 @@ private fun drawAndroidPath(
 
     val path = Path().apply {
         moveTo(points[0].x, points[0].y)
-        for (i in 0 until points.size - 1) {
-            val midX = (points[i].x + points[i + 1].x) / 2f
-            val midY = (points[i].y + points[i + 1].y) / 2f
-            quadTo(points[i].x, points[i].y, midX, midY)
+        if (points.size == 2) {
+            lineTo(points[1].x, points[1].y)
+        } else {
+            // Same Catmull-Rom curve as the on-screen renderer (WYSIWYG export).
+            for (seg in catmullRomSegments(points)) {
+                cubicTo(seg.c1.x, seg.c1.y, seg.c2.x, seg.c2.y, seg.end.x, seg.end.y)
+            }
         }
-        lineTo(points.last().x, points.last().y)
     }
     canvas.drawPath(path, paint)
 }

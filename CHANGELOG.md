@@ -8,7 +8,20 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
 
 ## [Unreleased]
 
-_Sem mudanças não lançadas._
+### Changed
+- **Precisão do desenho** bastante melhorada:
+  - **Catmull-Rom** no lugar da suavização por pontos médios — a linha agora
+    **passa pelos pontos reais** do toque (não desvia em cantos/curvas). Tela e
+    exportação usam a mesma geometria (WYSIWYG).
+  - **Samples sub-frame** (`PointerInputChange.historical`) capturam o caminho
+    real em traços rápidos (antes só a última posição por frame era usada).
+  - **Filtro 1€ (One-Euro)** remove tremor sem cortar precisão (suave quando
+    lento/parado, responsivo quando rápido).
+  - Append O(1) (`SnapshotStateList`) elimina o custo O(n²) por traço (menos lag).
+  - Dedup de samples muito próximos (< 0,75px).
+
+### Added
+- `OneEuroFilter` e `catmullRomSegments` (lógica pura) + 7 testes unitários.
 
 ## [1.0.0-alpha.2] - 2026-06-07
 

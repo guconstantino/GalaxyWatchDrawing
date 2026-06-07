@@ -97,7 +97,7 @@ fun DrawingCanvasScreen(viewModel: DrawingViewModel) {
                         awaitEachGesture {
                             // Wait for the first finger down
                             val firstDown = awaitFirstDown(requireUnconsumed = false)
-                            viewModel.startStroke(firstDown.position)
+                            viewModel.startStroke(firstDown.position, firstDown.uptimeMillis)
 
                             while (true) {
                                 val event = awaitPointerEvent()
@@ -141,7 +141,12 @@ fun DrawingCanvasScreen(viewModel: DrawingViewModel) {
                                     break 
                                 } else if (fingers.size == 1) {
                                     val change = event.changes.first { it.pressed }
-                                    viewModel.addPoint(change.position)
+                                    // Include sub-frame samples the system batched
+                                    // for accurate fast strokes, then the latest.
+                                    change.historical.forEach { h ->
+                                        viewModel.addPoint(h.position, h.uptimeMillis)
+                                    }
+                                    viewModel.addPoint(change.position, change.uptimeMillis)
                                     change.consume()
                                 } else {
                                     // No fingers pressed anymore
@@ -308,14 +313,14 @@ internal fun DrawScope.drawSmoothPath(
 
     val path = Path().apply {
         moveTo(points[0].x, points[0].y)
-        for (i in 0 until points.size - 1) {
-            val mid = Offset(
-                (points[i].x + points[i + 1].x) / 2f,
-                (points[i].y + points[i + 1].y) / 2f
-            )
-            quadraticBezierTo(points[i].x, points[i].y, mid.x, mid.y)
+        if (points.size == 2) {
+            lineTo(points[1].x, points[1].y)
+        } else {
+            // Catmull-Rom cubic that passes through every real point.
+            for (seg in catmullRomSegments(points)) {
+                cubicTo(seg.c1.x, seg.c1.y, seg.c2.x, seg.c2.y, seg.end.x, seg.end.y)
+            }
         }
-        lineTo(points.last().x, points.last().y)
     }
 
     drawPath(
