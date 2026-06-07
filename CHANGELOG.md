@@ -3,11 +3,41 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/)
-e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
+e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
+(`MAJOR.MINOR.PATCH`, com sufixos de pré-lançamento `-alpha.N` / `-beta.N`).
 
 ## [Unreleased]
 
+_Sem mudanças não lançadas._
+
+## [1.0.0-alpha.1] - 2026-06-06
+
+Primeiro lançamento público (**alpha**) — app de desenho Wear OS completo, com
+login Google e **sincronização para o Google Photos**.
+
 ### Added
+- **Sincronização com o Google Photos** (logado): ao tocar **Download**, o
+  desenho é salvo na galeria local **e** enviado para o **Google Photos do
+  próprio usuário** (escopo `photoslibrary.appendonly`), aparecendo no app Fotos
+  do celular. Deslogado = só local (nada sai do dispositivo).
+- `GooglePhotosUploader`: upload via REST (`/v1/uploads` →
+  `/v1/mediaItems:batchCreate`) usando `GoogleAuthUtil` + `HttpURLConnection` +
+  `org.json` (sem dependência nova).
+- `SyncQueue`: fila offline **persistente** (PNGs em disco + índice JSON em
+  `filesDir`) — sobrevive a restart e funciona offline. Estados PENDING /
+  UPLOADING / SYNCED / FAILED.
+- **Auto-retry** do sync: processa a fila no init do app, no login e ao tocar
+  Download (para no 1º erro de auth).
+- **Botão "Sync Now"** funcional no Profile: contagem de pendentes, **spinner**
+  durante o upload (não-clicável), estado **desabilitado** quando vazio, e linha
+  de status (`Syncing N/M`, `All synced ✓`, `N synced · M failed`).
+- `downloadDrawing()`: helper central do Download (salva local + enfileira sync),
+  usado nos 3 pontos (Canvas, My draws, Favorites).
+- `AuthManager`: escopo `photoslibrary.appendonly` + `account()` /
+  `hasPhotosScope()`.
+- Documentos de projeto: `docs/roadmap-sync-monetization.md` (plano de sync +
+  monetização), `CLAUDE.md` (instruções/hábitos do agente), `CONTRIBUTING.md`
+  (processo, versionamento, releases) e o relatório vivo no Notion.
 - Preparação para a **Play Store**: assinatura de release via **upload key**
   (`signingConfigs.release` lê `keystore.properties`, ambos os segredos —
   `keystore.properties` e `*.jks` — gitignored). Gera `.aab` assinado com
@@ -22,8 +52,8 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   (`GoogleSignIn`), com o seletor de conta nativo do relógio. A sessão é
   persistida pelo Play services (`getLastSignedInAccount`). Quando logado, o
   Settings abre o **Profile**: foto (carregada com Coil), "Hello, {nome}",
-  e-mail, **Sync Now** (placeholder — Toast "Coming soon"), **Reset All** e
-  **Logout**. **Reset All** abre a confirmação **"Caution / This action is
+  e-mail, **Sync Now** (sincroniza com o Google Photos — ver seção de sync),
+  **Reset All** e **Logout**. **Reset All** abre a confirmação **"Caution / This action is
   irreversible"** (Cancel / Delete All); ao confirmar, apaga My draws, Favorites
   e Trash (memória + JSON) e mostra **"All files have been removed."**.
 - `AuthManager` (camada de dados): encapsula `GoogleSignInOptions` com
@@ -83,6 +113,13 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   (`Haptics.kt`); requer permissão `VIBRATE`.
 
 ### Changed
+- **Política de Privacidade** e `docs/index.html` traduzidos de PT-BR para
+  **inglês**, com nova seção cobrindo o upload para o Google Photos (escopo
+  `appendonly`, dados no Photos do próprio usuário, fila offline, deslogado não
+  envia nada).
+- `downloadDrawing()` passou a **enfileirar** o upload via `DrawingViewModel`
+  (com persistência) em vez de subir direto — robusto a offline.
+- `versionName` para `1.0.0-alpha.1`.
 - **Ícone do app** atualizado: a "onda" agora usa o gradiente colorido da paleta
   (vermelho→laranja→verde→azul) sobre fundo preto, no lugar do traço branco.
   Vetorial (gradiente no `strokeColor`), aplicado via adaptive icon — vale para

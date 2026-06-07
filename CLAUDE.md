@@ -3,6 +3,16 @@
 App de desenho **standalone para Wear OS** (Galaxy Watch 4+). Kotlin + Jetpack
 Compose (Wear Compose Material3). Package `com.guconstantino.watchdraw`.
 
+## Hábitos obrigatórios
+
+1. **CHANGELOG sempre.** Toda mudança relevante entra em `## [Unreleased]` no
+   `CHANGELOG.md` (grupos Added/Changed/Fixed/Removed). No lançamento, mover para
+   `[<versão>] - data`.
+2. **Versionamento SemVer `MAJOR.MINOR.PATCH`** com pré-lançamentos
+   `-alpha.N` / `-beta.N`. A tag é `v<versão>` e o `versionName` deve bater.
+   Detalhes e processo de release em `CONTRIBUTING.md`.
+3. **Relatório do Notion** (abaixo) atualizado a cada fase/merge na `main`.
+
 ## Hábito: manter o relatório do Notion atualizado
 
 Existe uma página de relatório do projeto no Notion:
