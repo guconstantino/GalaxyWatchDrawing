@@ -10,6 +10,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.AndroidViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,7 +19,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
-class DrawingViewModel(app: Application) : AndroidViewModel(app) {
+class DrawingViewModel @JvmOverloads constructor(
+    app: Application,
+    private val uploader: PhotoUploader = GooglePhotosUploader,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : AndroidViewModel(app) {
 
     private val _drawnPaths = mutableStateListOf<DrawnPath>()
     val drawnPaths: List<DrawnPath> get() = _drawnPaths
@@ -517,7 +522,7 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun enqueueForSync(bitmap: Bitmap, drawingId: String? = null) {
         syncScope.launch {
-            val item = withContext(Dispatchers.IO) {
+            val item = withContext(ioDispatcher) {
                 val bytes = ByteArrayOutputStream().use { out ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
                     out.toByteArray()
@@ -551,26 +556,26 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
             var failed = 0
             syncState = SyncState.Syncing(done = 0, total = total)
             for (item in snapshot) {
-                val bytes = withContext(Dispatchers.IO) { SyncQueue.readBytes(getApplication(), item) }
+                val bytes = withContext(ioDispatcher) { SyncQueue.readBytes(getApplication(), item) }
                 val result = if (bytes == null) {
-                    GooglePhotosUploader.Result.Failed("missing file")
+                    UploadResult.Failed("missing file")
                 } else {
-                    GooglePhotosUploader.upload(getApplication(), bytes)
+                    uploader.upload(getApplication(), bytes)
                 }
                 when (result) {
-                    is GooglePhotosUploader.Result.Success -> {
-                        withContext(Dispatchers.IO) { SyncQueue.deleteFile(getApplication(), item) }
+                    is UploadResult.Success -> {
+                        withContext(ioDispatcher) { SyncQueue.deleteFile(getApplication(), item) }
                         _syncQueue.removeAll { it.id == item.id }
                         item.drawingId?.let { syncedIds = syncedIds + it }
                         uploaded++
                     }
-                    is GooglePhotosUploader.Result.NotSignedIn,
-                    is GooglePhotosUploader.Result.NeedsConsent -> {
+                    is UploadResult.NotSignedIn,
+                    is UploadResult.NeedsConsent -> {
                         // Auth problem affects every item — stop and leave the rest queued.
                         failed++
                         break
                     }
-                    is GooglePhotosUploader.Result.Failed -> {
+                    is UploadResult.Failed -> {
                         item.attempts++
                         failed++
                     }
@@ -578,7 +583,7 @@ class DrawingViewModel(app: Application) : AndroidViewModel(app) {
                 syncState = SyncState.Syncing(done = uploaded, total = total)
             }
             val ids = syncedIds
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 SyncQueue.saveIndex(getApplication(), _syncQueue)
                 SyncQueue.saveSyncedIds(getApplication(), ids)
             }
