@@ -21,12 +21,12 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Run unit tests
-        run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+        run: ./gradlew :app:testWatchDebugUnitTest --no-daemon --stacktrace
 
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
-          path: app/build/reports/tests/testDebugUnitTest
+          path: app/build/reports/tests/testWatchDebugUnitTest
           if-no-files-found: ignore

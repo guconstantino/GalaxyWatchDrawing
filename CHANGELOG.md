@@ -8,7 +8,15 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
 
 ## [Unreleased]
 
-_Sem mudanças não lançadas._
+### Added
+- **Harness de celular (dev-only):** product flavors `watch` (app real) e
+  `phone` (teste). O flavor `phone` roda o **mesmo `WatchDrawApp`** dentro de um
+  "mostrador" redondo, **redimensionável (zoom 150–400dp)**, sobre fundo
+  cinza-escuro, com um botão **↩ Voltar** que simula o back físico do relógio.
+  Mesmo `applicationId` (login/sync funcionam no celular). **Nunca é publicado.**
+  - `PhonePreviewActivity` + manifestos por flavor (`src/watch`, `src/phone`).
+  - Build do app real agora é `:app:assembleWatchRelease` / `bundleWatchRelease`;
+    harness: `:app:assemblePhoneRelease`. CI roda `testWatchDebugUnitTest`.
 
 ## [1.0.0-alpha.3] - 2026-06-07
 

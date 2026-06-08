@@ -77,8 +77,11 @@ testes JVM rápidos; UI/visual fica para o teste manual no relógio.
 - Terminal sem Java: usar o JDK do Android Studio →
   `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`
 - Release assinado precisa de `keystore.properties` + `upload-keystore.jks` na
-  raiz (ambos **gitignored**; restaurar do backup). Gera APK com
-  `:app:assembleRelease` e AAB com `:app:bundleRelease`.
+  raiz (ambos **gitignored**; restaurar do backup). O app real é o flavor
+  **`watch`**: APK com `:app:assembleWatchRelease`, AAB com `:app:bundleWatchRelease`.
+- **Flavors:** `watch` (produto real, publicado) e `phone` (harness dev-only que
+  roda a UI do relógio num mostrador redondo no celular — `:app:assemblePhoneRelease`).
+  **Nunca publicar o `phone`.** Testes unitários: `:app:testWatchDebugUnitTest`.
 - Instalar no Galaxy Watch real por cima (preserva dados) só funciona com APK de
   **release** (mesma assinatura): `adb -t <transport_id> install -r <apk>`.
 
