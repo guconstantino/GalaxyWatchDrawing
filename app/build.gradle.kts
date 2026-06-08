@@ -28,6 +28,16 @@ android {
         versionName = "1.0.0-alpha.3"
     }
 
+    // Two flavors of the SAME app (same applicationId, so Google Sign-In / sync
+    // work on both): `watch` is the real product; `phone` is a dev-only harness
+    // that runs the watch UI inside a round frame on the phone for fast testing.
+    // Only `watch` is ever published — never upload the `phone` variant.
+    flavorDimensions += "device"
+    productFlavors {
+        create("watch") { dimension = "device" }
+        create("phone") { dimension = "device" }
+    }
+
     signingConfigs {
         if (keystorePropertiesFile.exists()) {
             create("release") {
