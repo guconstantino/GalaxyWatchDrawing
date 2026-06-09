@@ -18,6 +18,16 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
   - Build do app real agora é `:app:assembleWatchRelease` / `bundleWatchRelease`;
     harness: `:app:assemblePhoneRelease`. CI roda `testWatchDebugUnitTest`.
 
+### Changed
+- **Novo logo da marca** (lápis desenhando um traço colorido) substituindo o
+  swoosh genérico — distintivo e claramente "app de desenho". Fonte vetorial em
+  `docs/store-assets/icon-source.svg`; exports 1024/512/120 atualizados. Resolve
+  a reprovação de branding do Google ("logo não identifica a marca").
+- **Verificação OAuth — página inicial em domínio próprio:** migrando a home/
+  política do `github.io` (public suffix, reprovado no branding) para
+  **`watchdraw.gustavoconstantino.com`** (GitHub Pages + `docs/CNAME`),
+  verificável por DNS.
+
 ## [1.0.0-alpha.3] - 2026-06-07
 
 Terceiro alpha — foco em **precisão do desenho**.
