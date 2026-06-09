@@ -18,20 +18,39 @@ ao público geral. Necessário porque o app usa o escopo **sensível**
 
 Tudo no projeto **watchdraw-gus** em https://console.cloud.google.com/auth (Google Auth Platform).
 
-### A1. Tela de consentimento (Branding) — ✅ FEITO
+### A1. Tela de consentimento (Branding)
 - **App name:** `WatchDraw`
-- **User support email:** `hello.gustavoconstantino@gmail.com`
-- **App logo:** `docs/store-assets/oauth-logo-120.png` (120×120, gerado do icon-512).
-- **App home page:** `https://guconstantino.github.io/GalaxyWatchDrawing/`
-  ⚠️ NÃO usar a URL do github.com — não dá para verificar o github.com como
-  domínio autorizado. Usar o github.io (que é nosso e verificado).
-- **Privacy policy:** `https://guconstantino.github.io/GalaxyWatchDrawing/privacy-policy.html`
+- **User support email:** `gustavohconst@gmail.com` (conta dona do projeto Cloud)
+- **App logo:** `docs/store-assets/oauth-logo-120.png` — **logo novo** (lápis
+  desenhando um traço colorido). O swoosh antigo foi **reprovado** pelo Google
+  ("não identifica a marca de forma exclusiva / parece outra marca"). Fonte
+  vetorial: `docs/store-assets/icon-source.svg`. ✅ corrigido.
+- **App home page:** `https://watchdraw.gustavoconstantino.com/`
+  ⚠️ O `github.io` foi **reprovado no branding** (public suffix → o Google não
+  aceita como "registrado para você"). Migramos para subdomínio próprio.
+- **Privacy policy:** `https://watchdraw.gustavoconstantino.com/privacy-policy.html`
 - **Authorized domains:** `watchdraw-gus.firebaseapp.com` (auto, Firebase) +
-  **`guconstantino.github.io`** (NÃO `github.io` — é public suffix, rejeitado
-  como "domínio inválido").
+  **`gustavoconstantino.com`** (domínio próprio, verificável por DNS).
 - **Developer contact email:** o mesmo
 
-### A2. Verificação de domínio — ✅ FEITO (via github.io)
+### A2. Verificação de domínio — ⚠️ REFEITO via domínio próprio
+> **github.io não serve para branding.** A verificação URL-prefix do
+> `guconstantino.github.io` foi feita e até aparece "verificada" no Search
+> Console, **mas o branding do Google reprova** com "a página inicial não está
+> registrada para você" — porque o domínio *registrável* (`github.io`) é da
+> GitHub. Solução: **subdomínio próprio** `watchdraw.gustavoconstantino.com`
+> (GoDaddy), servido pelo mesmo GitHub Pages via `docs/CNAME`, e o domínio
+> registrável `gustavoconstantino.com` verificado por **DNS TXT** no Search
+> Console (posse real). Aí o branding passa.
+>
+> Setup do subdomínio:
+> 1. GoDaddy → DNS → `CNAME` `watchdraw` → `guconstantino.github.io`.
+> 2. Repo: `docs/CNAME` = `watchdraw.gustavoconstantino.com` (commitado).
+> 3. GitHub → Settings → Pages → custom domain + Enforce HTTPS.
+> 4. Search Console → adicionar **Domínio** `gustavoconstantino.com` → TXT no GoDaddy.
+> 5. Branding (A1) → trocar home/política/authorized domains → re-verificar.
+
+### A2-legado. Verificação via github.io (não basta para branding)
 O Google exige que a conta dona do projeto **comprove posse** do domínio dos links
 acima, via **Google Search Console**.
 
@@ -62,9 +81,14 @@ account over HTTPS. We do not operate any server; we never receive or store the
 images or the user's photos.
 ```
 
-### A4. Vídeo de demonstração (YouTube, "Unlisted")
-Precisa mostrar o fluxo de consentimento E o uso do escopo. Roteiro (gravar com o
-app já funcionando no relógio/emulador):
+### A4. Vídeo de demonstração (YouTube, "Unlisted") — ✅ FEITO
+**Link:** https://youtube.com/shorts/le0TvygR1JQ (Não listado)
+
+> Gravado no relógio real (consent + Permitir + Download via `adb screenrecord`) e
+> no S24 (desenho aparecendo no Google Photos), juntados num arquivo só com ffmpeg.
+> Virou um "Short" (vertical/curto) — irrelevante para a verificação.
+
+Roteiro usado (gravar com o app já funcionando no relógio/emulador):
 1. Abrir o app; mostrar o nome/branding "WatchDraw" (igual à consent screen).
 2. Settings → tocar **"Sign in with Google"**.
 3. Mostrar o seletor de conta e a **tela de consentimento** exibindo a permissão
@@ -113,16 +137,18 @@ com o comportamento real:
 ---
 
 ## Progresso (jun/2026)
-- [x] A2 — domínio `guconstantino.github.io` verificado no Search Console (meta tag)
 - [x] A1 — Branding salvo (logo, links, authorized domains, contato)
+- [x] A2 — domínio `guconstantino.github.io` verificado no Search Console (meta tag)
+- [x] A4 — vídeo gravado e publicado: https://youtube.com/shorts/le0TvygR1JQ (Unlisted)
 - [ ] A3 — justificativa do escopo (texto pronto acima; colar em Acesso a dados)
-- [ ] A4 — **gravar o vídeo** (YouTube Unlisted) ← próximo passo
-- [ ] A5 — mudar para Produção + submeter na Central de verificação
+- [ ] A5 — colar justificativa + link do vídeo na Central de verificação, mudar
+      para Produção e **submeter** ← próximo passo
 - [ ] Parte B — Data Safety no Play Console (pode fazer a qualquer momento)
 
 ## Ordem sugerida
 1. ~~Consent screen (A1) + logo~~ ✅
 2. ~~Verificação de domínio (A2)~~ ✅
-3. Justificativa (A3) + gravar o vídeo (A4).
-4. Mudar para Produção e submeter (A5).
+3. ~~Gravar o vídeo (A4)~~ ✅
+4. **A5:** colar a justificativa (A3) + link do vídeo → mudar para Produção →
+   submeter na Central de verificação. ← próximo passo
 5. Preencher o Data Safety (Parte B) no Play Console.
