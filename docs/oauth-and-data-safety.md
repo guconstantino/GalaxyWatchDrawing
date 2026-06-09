@@ -101,9 +101,19 @@ Roteiro usado (gravar com o app já funcionando no relógio/emulador):
 
 Subir no YouTube como **Unlisted** e colar o link no campo do formulário.
 
-### A5. Submeter
-Cloud Console → **Verification Center** (Central de verificação) → preencher tudo
-acima → **Submit for verification**. Prazo: dias a algumas semanas.
+### A5. Submeter — ✅ SUBMETIDO (08/jun/2026)
+Cloud Console → **Verification Center** (Central de verificação) → preenchido
+(justificativa A3 + vídeo A4) + questionário (uso pessoal/interno/dev = **Não**;
+plug-in SMTP WordPress = **Não**; 2 caixas de confirmação marcadas) →
+**Submit for verification**.
+
+> **Status:** "Data access status: o acesso aos dados do seu app **está em
+> análise**." Branding ✅ verificado e publicado.
+> **Prazo oficial: revisão de 4 a 6 semanas; primeiro e-mail da equipe em 3–5
+> dias** (no contato `hello.gustavoconstantino@gmail.com`). A tela de permissão
+> aprovada continua em uso; nada quebra durante a análise.
+> Itens revisados: página inicial, política, funcionalidade, diretrizes de marca,
+> acesso a dados, escopos mínimos. Acompanhar em *Ver progresso da verificação*.
 
 ---
 
@@ -137,18 +147,30 @@ com o comportamento real:
 ---
 
 ## Progresso (jun/2026)
-- [x] A1 — Branding salvo (logo, links, authorized domains, contato)
-- [x] A2 — domínio `guconstantino.github.io` verificado no Search Console (meta tag)
-- [x] A4 — vídeo gravado e publicado: https://youtube.com/shorts/le0TvygR1JQ (Unlisted)
-- [ ] A3 — justificativa do escopo (texto pronto acima; colar em Acesso a dados)
-- [ ] A5 — colar justificativa + link do vídeo na Central de verificação, mudar
-      para Produção e **submeter** ← próximo passo
+- [x] A1 — Branding (logo NOVO distintivo, links no domínio próprio, contato) —
+      **verificado e publicado**
+- [x] A2 — domínio próprio `gustavoconstantino.com` verificado por **DNS** no
+      Search Console (o `github.io` foi reprovado: public suffix)
+- [x] A3 — justificativa do escopo colada na Central de verificação
+- [x] A4 — vídeo publicado: https://youtube.com/shorts/le0TvygR1JQ (Unlisted)
+- [x] A5 — **submetido em 08/jun/2026** → status "em análise" (aguardando Google)
 - [ ] Parte B — Data Safety no Play Console (pode fazer a qualquer momento)
 
 ## Ordem sugerida
 1. ~~Consent screen (A1) + logo~~ ✅
-2. ~~Verificação de domínio (A2)~~ ✅
+2. ~~Verificação de domínio (A2 — domínio próprio por DNS)~~ ✅
 3. ~~Gravar o vídeo (A4)~~ ✅
-4. **A5:** colar a justificativa (A3) + link do vídeo → mudar para Produção →
-   submeter na Central de verificação. ← próximo passo
-5. Preencher o Data Safety (Parte B) no Play Console.
+4. ~~A5 — justificativa + vídeo + questionário → submeter~~ ✅ (em análise)
+5. **Aguardar a análise do Google** (acompanhar em *Ver progresso da verificação*).
+6. Preencher o Data Safety (Parte B) no Play Console — pode ser feito em paralelo.
+
+## Aprendizados desta rodada (jun/2026)
+- **github.io não passa no branding de produção:** é *public suffix*; mesmo
+  verificado por meta tag no Search Console, o Google reprova a home page
+  ("não registrada para você"). Solução: subdomínio próprio + verificação DNS.
+- **Logo precisa ser distintivo:** um swoosh genérico é reprovado por "não
+  identificar a marca / parecer outra marca". Logo temático (lápis) passou.
+- **Verificação DNS automática do GoDaddy** (via Search Console) é instantânea —
+  não precisa copiar TXT à mão.
+- **Escopo sensível ≠ restrito:** `photoslibrary.appendonly` é **sensível**, então
+  **não** exige CASA (a caixa do questionário é só um reconhecimento condicional).
