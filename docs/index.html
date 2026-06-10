@@ -2,11 +2,88 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="google-site-verification" content="XiCUKL5oZnzKakwx8PtYmDyc2OFKZ6vMQJ-AX7KeFbY" />
-  <meta http-equiv="refresh" content="0; url=./privacy-policy.html" />
-  <title>WatchDraw</title>
+  <title>WatchDraw — Draw on your Galaxy Watch</title>
+  <meta name="description" content="WatchDraw is a standalone Wear OS drawing app for Galaxy Watch. Sketch right on your wrist, keep a gallery, and sync your drawings to your own Google Photos." />
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #0E1022;
+      color: #E8E9F0;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 64px; }
+    header { text-align: center; margin-bottom: 40px; }
+    .icon { width: 112px; height: 112px; border-radius: 24px; box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+    h1 { font-size: 2rem; margin: 20px 0 6px; }
+    .tagline { color: #AEB1C7; font-size: 1.1rem; margin: 0; }
+    h2 { font-size: 1.2rem; margin: 36px 0 10px; }
+    ul { padding-left: 1.2rem; }
+    li { margin: 6px 0; }
+    .card {
+      background: #181B33; border: 1px solid #262A55; border-radius: 14px;
+      padding: 18px 22px; margin-top: 18px;
+    }
+    a { color: #8AA2FF; }
+    footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #262A55; color: #8B8FAE; font-size: .9rem; text-align: center; }
+    .links a { display: inline-block; margin: 0 10px; }
+  </style>
 </head>
 <body>
-  <p>Redirecting to the <a href="./privacy-policy.html">Privacy Policy</a>…</p>
+  <div class="wrap">
+    <header>
+      <img class="icon" src="store-assets/icon-512.png" alt="WatchDraw app icon" />
+      <h1>WatchDraw</h1>
+      <p class="tagline">Draw right on your Galaxy Watch — no phone needed.</p>
+    </header>
+
+    <p>
+      <strong>WatchDraw</strong> is a standalone <strong>Wear OS</strong> drawing app built for the
+      round Galaxy Watch display. Open the app and sketch directly on your wrist, with smooth
+      strokes, a color palette, brush sizes, and haptic feedback on every action.
+    </p>
+
+    <h2>Features</h2>
+    <ul>
+      <li>Drawing canvas with smooth, fluid strokes</li>
+      <li>Curated color palette and three brush sizes</li>
+      <li>Undo / redo with two-finger gestures</li>
+      <li>"My draws" gallery, Favorites, and a Trash with restore</li>
+      <li>Export as an image: save to your gallery or share</li>
+      <li>Optional: sign in with Google to sync your drawings to your own Google Photos</li>
+    </ul>
+
+    <h2>Google Photos sync</h2>
+    <div class="card">
+      <p style="margin:0">
+        When you tap <strong>Download</strong> on a drawing, WatchDraw can upload that single image
+        to <strong>your own Google Photos library</strong> (using the
+        <code>photoslibrary.appendonly</code> scope), so you can view and share your drawings on your
+        phone. The app <strong>only adds images it creates</strong> — it never reads, lists, or browses
+        your existing photos, and there is no server in between. Signed out, everything stays local on
+        the watch.
+      </p>
+    </div>
+
+    <h2>Privacy &amp; contact</h2>
+    <p>
+      We don't sell or share your data. Your drawings are stored locally on the watch; the optional
+      Google Photos sync goes only to your own account. Read the full
+      <a href="privacy-policy.html">Privacy Policy</a>.
+    </p>
+    <p>Questions? <a href="mailto:hello.gustavoconstantino@gmail.com">hello.gustavoconstantino@gmail.com</a></p>
+
+    <footer>
+      <div class="links">
+        <a href="privacy-policy.html">Privacy Policy</a> ·
+        <a href="https://github.com/guconstantino/GalaxyWatchDrawing">Source on GitHub</a>
+      </div>
+      <p>© 2026 Gustavo Constantino · WatchDraw for Wear OS</p>
+    </footer>
+  </div>
 </body>
 </html>

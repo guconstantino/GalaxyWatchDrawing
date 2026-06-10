@@ -28,6 +28,12 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
   **`watchdraw.gustavoconstantino.com`** (GitHub Pages + `docs/CNAME`),
   verificável por DNS.
 
+### Fixed
+- **Landing page real em `docs/index.html`:** antes era só um redirect para a
+  política de privacidade — o que fez o Google reprovar a verificação OAuth
+  ("a URL da política é a mesma da página inicial"). Agora a home descreve o app
+  (logo, features, sync) e **linka** a política como página separada.
+
 ## [1.0.0-alpha.3] - 2026-06-07
 
 Terceiro alpha — foco em **precisão do desenho**.
