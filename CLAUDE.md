@@ -12,6 +12,12 @@ Compose (Wear Compose Material3). Package `com.guconstantino.watchdraw`.
    `-alpha.N` / `-beta.N`. A tag é `v<versão>` e o `versionName` deve bater.
    Detalhes e processo de release em `CONTRIBUTING.md`.
 3. **Relatório do Notion** (abaixo) atualizado a cada fase/merge na `main`.
+4. **README sincronizado.** Ao commitar mudanças de **código/build** (`app/`,
+   gradle), atualize o `README.md` para refletir features/stack/estrutura. Um hook
+   (`.claude/hooks/readme-reminder.sh`, configurado em `.claude/settings.json`)
+   **bloqueia o `git commit`** se houver código no stage sem o `README.md` junto.
+   Quando o README realmente não precisar mudar, inclua **`[skip-readme]`** na
+   mensagem do commit para liberar.
 
 ## Hábito: manter o relatório do Notion atualizado
 
