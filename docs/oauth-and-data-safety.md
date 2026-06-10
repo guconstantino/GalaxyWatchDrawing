@@ -174,3 +174,9 @@ com o comportamento real:
   não precisa copiar TXT à mão.
 - **Escopo sensível ≠ restrito:** `photoslibrary.appendonly` é **sensível**, então
   **não** exige CASA (a caixa do questionário é só um reconhecimento condicional).
+- **Home page NÃO pode redirecionar para a política:** o `index.html` era um
+  `<meta refresh>` para `privacy-policy.html`. Na análise (10/jun) o Google
+  reprovou o item "Requisitos da política de privacidade" com *"a URL da política
+  é a mesma da página inicial"*. Correção: transformar a home numa **landing page
+  real** (descreve o app, com link — não redirect — para a política). Home e
+  política precisam ser **páginas distintas com conteúdo próprio**.

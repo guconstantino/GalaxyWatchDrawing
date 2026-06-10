@@ -187,6 +187,12 @@ formulário:
    **domínio próprio** verificado por DNS.
 5. **Sensível ≠ restrito.** Escopos sensíveis (como `photoslibrary.appendonly`)
    **não** exigem CASA. Não se assuste com a caixa do questionário.
+6. **A home page não pode ser um redirect para a política.** (Descoberto na
+   análise, 2 dias depois.) Meu `index.html` só tinha um `<meta refresh>` para
+   `privacy-policy.html` — o Google reprovou "a URL da política é a mesma da
+   página inicial". Home e política têm que ser **páginas distintas, com conteúdo
+   próprio**. Transformei a home numa landing page real (logo, features, link
+   para a política) e reenviei.
 
 ## Stack/ferramentas usadas hoje (e por quê)
 - `adb screenrecord` — capturar relógio e celular reais (autenticidade).
