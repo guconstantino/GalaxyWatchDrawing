@@ -15,9 +15,9 @@ Compose (Wear Compose Material3). Package `com.guconstantino.watchdraw`.
 4. **README sincronizado.** Ao commitar mudanças de **código/build** (`app/`,
    gradle), atualize o `README.md` para refletir features/stack/estrutura. Um hook
    (`.claude/hooks/readme-reminder.sh`, configurado em `.claude/settings.json`)
-   **bloqueia o `git commit`** se houver código no stage sem o `README.md` junto.
-   Quando o README realmente não precisar mudar, inclua **`[skip-readme]`** na
-   mensagem do commit para liberar.
+   emite um **aviso não-bloqueante** no `git commit` se houver código no stage sem
+   o `README.md` junto — o commit segue normalmente. Inclua **`[skip-readme]`** na
+   mensagem para silenciar o aviso quando o README não precisar mudar.
 
 ## Hábito: manter o relatório do Notion atualizado
 
