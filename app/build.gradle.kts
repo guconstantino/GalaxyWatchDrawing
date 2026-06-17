@@ -24,8 +24,8 @@ android {
         applicationId = "com.guconstantino.watchdraw"
         minSdk = 30
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.0-alpha.3"
+        versionCode = 4
+        versionName = "1.0.0-alpha.4"
     }
 
     // Two flavors of the SAME app (same applicationId, so Google Sign-In / sync

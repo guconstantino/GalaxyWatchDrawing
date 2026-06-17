@@ -8,6 +8,12 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
 
 ## [Unreleased]
 
+## [1.0.0-alpha.4] - 2026-06-17
+
+Quarto alpha — **conserta o consentimento/sync do Google Fotos** (causa da
+reprovação na verificação OAuth), harness de celular, novo logo e home OAuth
+em domínio próprio.
+
 ### Added
 - **Harness de celular (dev-only):** product flavors `watch` (app real) e
   `phone` (teste). O flavor `phone` roda o **mesmo `WatchDrawApp`** dentro de um
