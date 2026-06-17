@@ -2,6 +2,7 @@ package com.guconstantino.watchdraw.data
 
 import android.content.Context
 import com.google.android.gms.auth.GoogleAuthUtil
+import com.google.android.gms.auth.UserRecoverableAuthException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -35,10 +36,13 @@ object GooglePhotosUploader : PhotoUploader {
     override suspend fun upload(context: Context, pngBytes: ByteArray): UploadResult =
         withContext(Dispatchers.IO) {
             val account = AuthManager.account(context) ?: return@withContext UploadResult.NotSignedIn
-            if (!AuthManager.hasPhotosScope(context)) return@withContext UploadResult.NeedsConsent
             val androidAccount = account.account ?: return@withContext UploadResult.NotSignedIn
 
             try {
+                // Fetching a token for the Photos scope is what triggers the
+                // consent screen: if the user hasn't granted it (the Wear native
+                // sign-in only grants identity), getToken throws a
+                // UserRecoverableAuthException carrying the consent Intent.
                 val token = GoogleAuthUtil.getToken(
                     context,
                     androidAccount,
@@ -50,8 +54,10 @@ object GooglePhotosUploader : PhotoUploader {
 
                 val created = batchCreate(token, uploadToken)
                 if (created) UploadResult.Success else UploadResult.Failed("media item creation failed")
+            } catch (e: UserRecoverableAuthException) {
+                // Scope not granted yet — hand the consent screen back to the UI.
+                UploadResult.NeedsConsent(e.intent)
             } catch (e: Exception) {
-                // UserRecoverableAuthException (consent revoked/needed) lands here too.
                 UploadResult.Failed(e.message ?: "unknown error")
             }
         }

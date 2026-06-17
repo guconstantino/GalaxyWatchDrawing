@@ -89,7 +89,7 @@ class SyncProcessingTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         Dispatchers.setMain(dispatcher)
         seedQueue("d1", "d2")
-        val fake = FakeUploader(UploadResult.NeedsConsent)
+        val fake = FakeUploader(UploadResult.NeedsConsent(null))
         val vm = DrawingViewModel(app, fake, dispatcher)
 
         vm.onSignedIn(UserProfile("name", "e@x.com"))

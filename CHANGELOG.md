@@ -29,6 +29,14 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
   verificável por DNS.
 
 ### Fixed
+- **Consentimento do Google Fotos nunca era exibido (sync quebrado):** o login
+  nativo do Wear concede só a identidade, então o escopo sensível
+  `photoslibrary.appendonly` ficava sem concessão e o `Sync` falhava em silêncio
+  (`NeedsConsent` tratado como falha comum, sem abrir tela alguma). Agora, quando
+  o escopo falta, o app captura o `UserRecoverableAuthException` do
+  `GoogleAuthUtil.getToken` e **abre a tela de consentimento do OAuth**;
+  concedido, o sync é re-tentado automaticamente. Resolve a reprovação do Google
+  ("o vídeo não mostra o fluxo de consentimento do OAuth") e conserta o sync.
 - **Landing page real em `docs/index.html`:** antes era só um redirect para a
   política de privacidade — o que fez o Google reprovar a verificação OAuth
   ("a URL da política é a mesma da página inicial"). Agora a home descreve o app

@@ -1,6 +1,7 @@
 package com.guconstantino.watchdraw.data
 
 import android.app.Application
+import android.content.Intent
 import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -111,6 +112,14 @@ class DrawingViewModel @JvmOverloads constructor(
 
     /** Ids of drawings already uploaded to Google Photos (for the cloud badge). */
     var syncedIds by mutableStateOf<Set<String>>(emptySet())
+        private set
+
+    /**
+     * Set when a sync attempt needs the user to grant the Google Photos scope.
+     * The activity observes this, launches the consent screen, and reports back
+     * via [onConsentLaunched] / [onConsentResult].
+     */
+    var pendingConsentIntent by mutableStateOf<Intent?>(null)
         private set
 
     private var syncing = false
@@ -562,6 +571,20 @@ class DrawingViewModel @JvmOverloads constructor(
         processSyncQueue()
     }
 
+    /** Called by the activity right after launching the consent screen. */
+    fun onConsentLaunched() {
+        pendingConsentIntent = null
+    }
+
+    /**
+     * Called by the activity with the consent screen's result. When granted,
+     * the queued uploads are retried (the token now carries the Photos scope).
+     */
+    fun onConsentResult(granted: Boolean) {
+        pendingConsentIntent = null
+        if (granted) processSyncQueue()
+    }
+
     /** Uploads every queued item, removing the ones that succeed. */
     private fun processSyncQueue() {
         if (syncing || userProfile == null || _syncQueue.isEmpty()) return
@@ -586,8 +609,14 @@ class DrawingViewModel @JvmOverloads constructor(
                         item.drawingId?.let { syncedIds = syncedIds + it }
                         uploaded++
                     }
-                    is UploadResult.NotSignedIn,
                     is UploadResult.NeedsConsent -> {
+                        // Surface the consent screen; the rest stays queued and is
+                        // retried once the user grants the Photos scope.
+                        result.recoveryIntent?.let { pendingConsentIntent = it }
+                        failed++
+                        break
+                    }
+                    is UploadResult.NotSignedIn -> {
                         // Auth problem affects every item — stop and leave the rest queued.
                         failed++
                         break
