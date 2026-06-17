@@ -1,13 +1,19 @@
 package com.guconstantino.watchdraw.data
 
 import android.content.Context
+import android.content.Intent
 
 /** Result of attempting to upload a single image. */
 sealed class UploadResult {
     object Success : UploadResult()
     object NotSignedIn : UploadResult()
-    /** Sign-in succeeded but the Photos scope is missing — needs re-consent. */
-    object NeedsConsent : UploadResult()
+    /**
+     * Sign-in succeeded but the Google Photos scope hasn't been granted yet.
+     * [recoveryIntent] is the system consent screen to launch so the user can
+     * grant it (from a [com.google.android.gms.auth.UserRecoverableAuthException]);
+     * null when no recovery intent is available.
+     */
+    data class NeedsConsent(val recoveryIntent: Intent?) : UploadResult()
     data class Failed(val reason: String) : UploadResult()
 }
 
