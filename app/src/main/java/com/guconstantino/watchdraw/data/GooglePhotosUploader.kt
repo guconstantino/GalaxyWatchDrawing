@@ -33,37 +33,62 @@ object GooglePhotosUploader : PhotoUploader {
         "https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate"
     private const val ALBUM_DESCRIPTION = "WatchDraw"
 
+    /** Outcome of a single upload attempt with a given access token. */
+    private enum class Attempt { SUCCESS, AUTH_FAILED, FAILED }
+
     override suspend fun upload(context: Context, pngBytes: ByteArray): UploadResult =
         withContext(Dispatchers.IO) {
             val account = AuthManager.account(context) ?: return@withContext UploadResult.NotSignedIn
             val androidAccount = account.account ?: return@withContext UploadResult.NotSignedIn
+            val scope = "oauth2:${AuthManager.PHOTOS_APPEND_SCOPE}"
 
             try {
                 // Fetching a token for the Photos scope is what triggers the
-                // consent screen: if the user hasn't granted it (the Wear native
-                // sign-in only grants identity), getToken throws a
+                // consent screen: if the user has never granted it (the Wear
+                // native sign-in only grants identity), getToken throws a
                 // UserRecoverableAuthException carrying the consent Intent.
-                val token = GoogleAuthUtil.getToken(
-                    context,
-                    androidAccount,
-                    "oauth2:${AuthManager.PHOTOS_APPEND_SCOPE}"
-                )
+                var token = GoogleAuthUtil.getToken(context, androidAccount, scope)
+                var attempt = tryUpload(token, pngBytes)
 
-                val uploadToken = postBytes(token, pngBytes)
-                    ?: return@withContext UploadResult.Failed("upload failed")
+                if (attempt == Attempt.AUTH_FAILED) {
+                    // The cached token is stale or the grant was revoked while it
+                    // was still cached. Drop it and fetch a fresh one — if the
+                    // grant is really gone, this throws UserRecoverableAuthException
+                    // and the consent screen is surfaced below.
+                    GoogleAuthUtil.clearToken(context, token)
+                    token = GoogleAuthUtil.getToken(context, androidAccount, scope)
+                    attempt = tryUpload(token, pngBytes)
+                }
 
-                val created = batchCreate(token, uploadToken)
-                if (created) UploadResult.Success else UploadResult.Failed("media item creation failed")
+                when (attempt) {
+                    Attempt.SUCCESS -> UploadResult.Success
+                    Attempt.AUTH_FAILED -> UploadResult.NeedsConsent(null)
+                    Attempt.FAILED -> UploadResult.Failed("upload failed")
+                }
             } catch (e: UserRecoverableAuthException) {
-                // Scope not granted yet — hand the consent screen back to the UI.
+                // Scope not granted (or just revoked) — hand the consent screen back.
                 UploadResult.NeedsConsent(e.intent)
             } catch (e: Exception) {
                 UploadResult.Failed(e.message ?: "unknown error")
             }
         }
 
-    /** Step 1 — upload raw bytes, return the upload token (response body), or null. */
-    private fun postBytes(accessToken: String, bytes: ByteArray): String? {
+    /** Runs both upload steps with [token], classifying the outcome. */
+    private fun tryUpload(token: String, bytes: ByteArray): Attempt {
+        val (upCode, upBody) = postBytes(token, bytes)
+        if (upCode == 401 || upCode == 403) return Attempt.AUTH_FAILED
+        val uploadToken = upBody?.takeIf { upCode in 200..299 && it.isNotEmpty() }
+            ?: return Attempt.FAILED
+        val (createCode, created) = batchCreate(token, uploadToken)
+        return when {
+            createCode == 401 || createCode == 403 -> Attempt.AUTH_FAILED
+            created -> Attempt.SUCCESS
+            else -> Attempt.FAILED
+        }
+    }
+
+    /** Step 1 — upload raw bytes; returns (httpStatus, responseBody-or-null). */
+    private fun postBytes(accessToken: String, bytes: ByteArray): Pair<Int, String?> {
         val conn = (URL(UPLOAD_URL).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
@@ -76,20 +101,22 @@ object GooglePhotosUploader : PhotoUploader {
         }
         return try {
             conn.outputStream.use { it.write(bytes) }
-            if (conn.responseCode in 200..299) {
+            val code = conn.responseCode
+            val body = if (code in 200..299) {
                 conn.inputStream.bufferedReader().use { it.readText() }.trim()
             } else {
                 null
             }
+            code to body
         } catch (e: Exception) {
-            null
+            -1 to null
         } finally {
             conn.disconnect()
         }
     }
 
-    /** Step 2 — create the media item from the upload token. */
-    private fun batchCreate(accessToken: String, uploadToken: String): Boolean {
+    /** Step 2 — create the media item; returns (httpStatus, created?). */
+    private fun batchCreate(accessToken: String, uploadToken: String): Pair<Int, Boolean> {
         val fileName = "watchdraw_${System.currentTimeMillis()}.png"
         val body = JSONObject().apply {
             put("newMediaItems", JSONArray().apply {
@@ -113,15 +140,17 @@ object GooglePhotosUploader : PhotoUploader {
         }
         return try {
             conn.outputStream.use { it.write(body.toByteArray()) }
-            if (conn.responseCode !in 200..299) return false
+            val code = conn.responseCode
+            if (code !in 200..299) return code to false
             val response = conn.inputStream.bufferedReader().use { it.readText() }
             // newMediaItemResults[].status.message == "Success" (code 0/absent on OK)
             val results = JSONObject(response).optJSONArray("newMediaItemResults")
             val status = results?.optJSONObject(0)?.optJSONObject("status")
             // A successful create has status code 0 (i.e. no "code" field) or message OK.
-            status == null || status.optInt("code", 0) == 0
+            val created = status == null || status.optInt("code", 0) == 0
+            code to created
         } catch (e: Exception) {
-            false
+            -1 to false
         } finally {
             conn.disconnect()
         }

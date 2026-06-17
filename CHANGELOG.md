@@ -34,9 +34,15 @@ e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/)
   `photoslibrary.appendonly` ficava sem concessão e o `Sync` falhava em silêncio
   (`NeedsConsent` tratado como falha comum, sem abrir tela alguma). Agora, quando
   o escopo falta, o app captura o `UserRecoverableAuthException` do
-  `GoogleAuthUtil.getToken` e **abre a tela de consentimento do OAuth**;
-  concedido, o sync é re-tentado automaticamente. Resolve a reprovação do Google
-  ("o vídeo não mostra o fluxo de consentimento do OAuth") e conserta o sync.
+  `GoogleAuthUtil.getToken` e **abre a tela de consentimento do OAuth**
+  (`WearableGrantCredentialsActivity`); concedido, o sync é re-tentado
+  automaticamente. Resolve a reprovação do Google ("o vídeo não mostra o fluxo de
+  consentimento do OAuth") e conserta o sync. **Verificado no Galaxy Watch 7
+  (SM-L320).**
+- **Acesso revogado deixava o sync travado para sempre:** com um token ainda em
+  cache, o upload tomava 401/403 e era tratado como falha genérica (sem re-pedir
+  consentimento). Agora, ao receber 401/403, o app faz `clearToken` e busca um
+  token novo — se a concessão sumiu, isso reabre o consentimento.
 - **Landing page real em `docs/index.html`:** antes era só um redirect para a
   política de privacidade — o que fez o Google reprovar a verificação OAuth
   ("a URL da política é a mesma da página inicial"). Agora a home descreve o app
